@@ -26,7 +26,8 @@ workspaceRouter.post("/", async (req, res) => {
 
 workspaceRouter.post("/:workspaceId/invites", requireWorkspaceMember, async (req, res) => {
   try {
-    const invite = await createInvite(req.params.workspaceId!, (req as AuthedRequest).userId, req.body.email ?? "");
+    const workspaceId = req.params.workspaceId as string;
+    const invite = await createInvite(workspaceId, (req as AuthedRequest).userId, req.body.email ?? "");
     return res.status(201).json(invite);
   } catch (error) {
     const response = getErrorResponse(error);

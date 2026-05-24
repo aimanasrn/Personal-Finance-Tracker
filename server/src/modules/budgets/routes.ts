@@ -10,7 +10,8 @@ budgetRouter.use(requireAuth, requireWorkspaceMember);
 
 budgetRouter.post("/", async (req, res) => {
   try {
-    const budget = await upsertBudget(req.params.workspaceId!, req.body);
+    const workspaceId = (req.params as { workspaceId: string }).workspaceId;
+    const budget = await upsertBudget(workspaceId, req.body);
     return res.status(201).json(budget);
   } catch (error) {
     const response = getErrorResponse(error);

@@ -8,6 +8,7 @@ export const categoryRouter = Router({ mergeParams: true });
 categoryRouter.use(requireAuth, requireWorkspaceMember);
 
 categoryRouter.get("/", async (req, res) => {
-  const categories = await listCategories(req.params.workspaceId!);
+  const workspaceId = (req.params as { workspaceId: string }).workspaceId;
+  const categories = await listCategories(workspaceId);
   res.status(200).json(categories);
 });

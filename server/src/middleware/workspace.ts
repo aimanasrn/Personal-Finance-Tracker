@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import type { AuthedRequest } from "./auth.js";
 
 export async function requireWorkspaceMember(req: Request, res: Response, next: NextFunction) {
-  const { workspaceId } = req.params;
+  const workspaceId = req.params.workspaceId as string | undefined;
   const userId = (req as AuthedRequest).userId;
 
   if (!workspaceId) {

@@ -10,5 +10,6 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src", "prisma/seed.ts"]
+  "include": ["src/**/*.ts", "prisma/seed.ts"],
+  "exclude": ["src/__tests__"]
 }

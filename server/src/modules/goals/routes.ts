@@ -10,7 +10,8 @@ goalRouter.use(requireAuth, requireWorkspaceMember);
 
 goalRouter.post("/", async (req, res) => {
   try {
-    const goal = await createGoal(req.params.workspaceId!, req.body);
+    const workspaceId = (req.params as { workspaceId: string }).workspaceId;
+    const goal = await createGoal(workspaceId, req.body);
     return res.status(201).json(goal);
   } catch (error) {
     const response = getErrorResponse(error);
