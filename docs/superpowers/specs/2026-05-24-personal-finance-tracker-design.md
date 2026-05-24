@@ -1,297 +1,572 @@
-# Personal Finance Tracker Design
+# Personal Finance Tracker Design Spec
+
+**Date:** 2026-05-24
 
-Date: 2026-05-24
+## Product Summary
 
-## Overview
+This product is a beginner-friendly web-based personal finance tracker for users who want something simpler than spreadsheets but more structured than notes. The app should feel local-friendly, mobile responsive, clean, and easy to use while still being built on a SaaS-ready foundation.
 
-This project is a local, self-hosted personal finance tracker built as a responsive web application using React, Node.js, MySQL, and Tailwind CSS.
+The first release focuses on the core money-tracking loop:
+- sign up and log in
+- add, edit, and delete income and expense transactions
+- view totals and monthly summaries
+- get simple category suggestions
+- export monthly reports
 
-The product is budgeting-first rather than accounting-first. The main goal of the first release is to help users plan and manage spending through monthly budgets, savings goals, and recurring planned expenses. The application must support both personal finance and shared household collaboration from the first version.
+The product should avoid accounting-heavy workflows and instead help users build confidence through fast entry, plain language, and clear monthly visibility.
 
-## Product Goals
+## Target Users
+
+Primary users:
+- young working adults tracking salary and daily spending
+- students or fresh graduates managing limited budgets
+- side hustlers who want simple income and expense visibility
+- users who dislike spreadsheets but still want structure and reports
 
-- Support multiple users from day one
-- Support both private personal workspaces and shared household workspaces
-- Keep the first version focused on budgeting and planning, not deep analytics
-- Run locally with a simple development setup
-- Deliver a responsive experience that feels intentional on both desktop and mobile
-- Use motion and transitions to make the dashboard feel active and modern without adding noise
+Secondary future users:
+- households that may later want shared finance views
+- users who eventually want debt, savings, or AI-guided planning features
+
+## Problems Solved
+
+The MVP solves these main problems:
+- financial records are scattered across notes, memory, banking apps, or Excel
+- users do not know their real monthly balance
+- manual categorization is inconsistent and annoying
+- monthly review is too weak to reveal bad spending habits
+- many finance tools feel too complex or too enterprise-like for beginners
+
+## Product Scope
+
+### MVP Features
+
+- signup, login, and logout
+- protected private finance pages
+- add income transactions
+- add expense transactions
+- edit and delete transactions
+- filter transactions by date, category, and type
+- dashboard totals for income, expenses, and balance
+- automatic category suggestion from transaction title keywords
+- monthly report with charts and top spending categories
+- exportable monthly report
+- responsive UI that works well on mobile and desktop
+
+### Not in MVP
 
-## Non-Goals
+These are intentionally planned for later phases and should not be built into the first release:
+- debt tracker
+- savings goals
+- AI spending analysis
+- recurring bills and reminders
+- bank sync
+- multi-currency
+- shared or family accounts
 
-- Bank sync in v1
-- CSV import in v1
-- Deep analytics and advanced reporting in v1
-- Highly granular permissions beyond a minimal household role model
-- Native mobile applications in v1
+## Product Positioning
 
-## Technical Stack
+The product should sit between a spreadsheet and a full finance suite. It should feel approachable, encouraging, and modern. Users should be able to log a transaction in seconds, understand their monthly state at a glance, and correct mistakes without friction.
 
-- Frontend: React SPA
-- Styling: Tailwind CSS
-- Backend: Node.js REST API
-- Database: MySQL
-- Authentication: email/password
+Possible product names:
+- CashNest
+- FlowLedger
+- Pennyboard
+- TrackMint
+- SpendBloom
+- PocketPattern
 
-This should be implemented as a single local web stack, not microservices.
+Recommended naming direction:
+- `CashNest` for a friendly, approachable brand
+- `FlowLedger` for a cleaner, more product-oriented brand
 
-## Core Product Model
+## Platform and Technical Direction
 
-The primary boundary in the system is the workspace.
+The application should use a single Next.js codebase with the App Router. The frontend, server components, route handlers, and authenticated data access should live in one project to keep the MVP simple and cohesive.
 
-- Every user has a private personal workspace
-- Users can also create or join shared household workspaces
-- All finance data belongs to a workspace, not directly to a user
+Selected platform decisions:
+- balanced responsive web app
+- full authentication from day one
+- Next.js full-stack architecture
+- Supabase Postgres as the database platform
 
-This rule keeps data ownership, access control, and reporting logic consistent across personal and household use cases.
+Primary stack:
+- frontend: Next.js with React
+- styling: Tailwind CSS
+- backend: Next.js route handlers and server-side logic
+- database: Supabase Postgres
+- charts: Recharts
+- authentication: full signup and login flow from day one
 
-## User Roles
+## Architecture Overview
 
-V1 role model:
+The MVP should be split into the following clear responsibility areas:
 
-- `owner`
-- `member`
+### 1. Auth
 
-Expected behavior:
+Responsible for:
+- signup
+- login
+- logout
+- session management
+- protected routes
 
-- Owners can manage workspace settings, invite members, and manage shared budgeting data
-- Members can participate in the workspace and use shared budgeting features
+### 2. Transactions
 
-V1 should keep permissions minimal and explicit. More detailed role controls can be added later if needed.
+Responsible for:
+- creating transactions
+- editing transactions
+- deleting transactions
+- filtering by date, category, and type
+- returning recent transaction lists
 
-## Core Features
+### 3. Reports
 
-### 1. Authentication
+Responsible for:
+- monthly income totals
+- monthly expense totals
+- monthly net balance
+- spending by category
+- top spending categories
+- export support
 
-- Sign up with email and password
-- Sign in with email and password
-- Passwords must be stored securely using hashing
+### 4. Categories
 
-### 2. Workspaces
+Responsible for:
+- default category definitions
+- user custom categories later if needed
+- keyword-based category suggestions
+- category override behavior
 
-- Create a private personal workspace automatically for each new user
-- Create shared household workspaces
-- Invite other users into a household workspace
-- Switch between personal and household workspaces in the UI
+### 5. UI Shell
 
-### 3. Transactions
+Responsible for:
+- responsive app layout
+- navigation
+- dashboard summary cards
+- shared form patterns
+- loading and empty states
 
-Manual entry only in v1.
+## Data Boundaries
 
-Each transaction should include:
+The most important boundary is user isolation. Every transaction, category rule, and query must be scoped to the authenticated user. No user should be able to access another user's records through URLs, filters, exports, or API requests.
 
-- amount
-- type (`income` or `expense`)
-- category
-- date
-- optional note
+Auto-categorization must be suggestion-based rather than mandatory. The app can suggest a category from the transaction title, but the user must always be able to change it before saving.
 
-Transactions are used to drive budget tracking and goal progress. They do not need advanced accounting behavior in v1.
+Monthly reporting data should be derived from transactions rather than stored permanently in the MVP. This keeps the first release simpler and avoids synchronization issues between stored summaries and source data.
 
-### 4. Monthly Budgets
+## Database Schema
 
-- Budgets are monthly
-- Budgets are category-based
-- Users can set planned amounts per category for a workspace
-- Budget reporting compares planned vs actual spending
+The MVP schema should stay compact and relational while leaving room for future modules.
 
-### 5. Savings Goals
+### Core Tables
 
-Each goal should support:
+- `users`
+- `profiles`
+- `categories`
+- `transactions`
+- `category_rules`
 
-- name
-- target amount
-- current progress
-- optional target date
+### users
 
-Goals should appear clearly on the dashboard and show visible progress.
+Managed by the authentication layer. The app should not store raw passwords in custom tables.
 
-### 6. Recurring Planned Expenses
+Expected fields handled by auth layer:
+- `id`
+- `email`
+- `password_hash` or provider-managed equivalent
+- auth timestamps and metadata
 
-Recurring expenses are planning items, not automatic ledger entries.
+### profiles
 
-Expected behavior:
+Purpose: user-facing preferences and profile data separate from auth identity.
 
-- Users define recurring planned expenses for a workspace
-- The system generates planned expense instances for the relevant month
-- Users can mark each planned instance as `paid` or `skipped`
-- Marking an item as `paid` creates a real transaction
-- Marking an item as `skipped` preserves planning history but does not affect actual spending
+Fields:
+- `id`
+- `user_id`
+- `display_name`
+- `preferred_currency`
+- `created_at`
+- `updated_at`
 
-This preserves the distinction between planned activity and actual recorded spending.
+### categories
 
-### 7. Reporting
+Purpose: support system defaults and future user-defined categories.
 
-Reporting remains intentionally basic in v1:
+Fields:
+- `id`
+- `user_id` nullable for system defaults
+- `name`
+- `type` enum: `income` or `expense`
+- `color`
+- `icon`
+- `is_default`
+- `created_at`
 
-- monthly budget vs actual
-- savings goal progress
-- monthly/category spending summaries
+### transactions
 
-The first version should not attempt deep analytics or large reporting surfaces.
+Purpose: store all tracked financial events for the user.
 
-## Data Model
+Fields:
+- `id`
+- `user_id`
+- `title`
+- `amount`
+- `type` enum: `income` or `expense`
+- `category_id`
+- `transaction_date`
+- `notes` nullable
+- `created_at`
+- `updated_at`
 
-Main entities:
+### category_rules
 
-- `User`
-- `Workspace`
-- `WorkspaceMember`
-- `Category`
-- `Transaction`
-- `MonthlyBudget`
-- `SavingsGoal`
-- `RecurringExpense`
-- `PlannedExpenseInstance`
+Purpose: deterministic auto-category suggestions based on title keywords.
 
-### Model Notes
+Fields:
+- `id`
+- `user_id`
+- `keyword`
+- `suggested_category_id`
+- `priority`
+- `created_at`
 
-- `Workspace` represents either a personal or household finance space
-- `WorkspaceMember` links users to workspaces and stores the user role
-- `Category` is scoped to a workspace
-- `MonthlyBudget` is scoped by workspace, category, month, and year
-- `Transaction` belongs to a workspace and category
-- `SavingsGoal` belongs to a workspace
-- `RecurringExpense` stores the recurring rule and planning metadata
-- `PlannedExpenseInstance` represents a generated occurrence for user review and status tracking
+## Category Suggestion Model
 
-## API and Backend Responsibilities
+The first release should use a deterministic keyword engine instead of AI. That gives predictable results, easier testing, and faster implementation.
 
-The Node.js backend is responsible for:
+Suggested logic:
+1. Normalize the transaction title to lowercase.
+2. Compare against known keywords such as `grab`, `mamak`, `salary`, and `shopee`.
+3. Return the highest-priority matching category rule.
+4. Pre-fill the category field with that suggestion.
+5. Allow the user to override the suggestion before saving.
 
-- authentication
-- workspace membership and authorization checks
-- transaction CRUD
-- monthly budget CRUD
-- savings goal CRUD
-- recurring expense CRUD
-- planned expense instance generation and status changes
-- reporting endpoints for dashboard summaries
+Example mappings:
+- `Grab` -> `Transport`
+- `Mamak` -> `Food`
+- `Salary` -> `Income`
+- `Shopee` -> `Shopping`
 
-Access control must be enforced on every finance endpoint based on workspace membership.
+Future enhancement options:
+- learn from user corrections
+- fuzzy matching
+- merchant alias libraries
+- AI-enhanced classification
+
+## Reporting Model
+
+Monthly reports should be generated live from transaction data.
+
+Each monthly report should compute:
+- total income for the selected month
+- total expenses for the selected month
+- monthly net balance
+- spending grouped by category
+- top spending categories
+- month-over-month comparison when prior data exists
 
-## Frontend Responsibilities
+### Export Model
 
-The React frontend is responsible for:
+The MVP export strategy should start simple:
+- CSV export for transactions in the selected month
+- print-friendly report layout for browser printing
 
-- sign-in and sign-up flows
-- workspace switching
-- transaction entry forms
-- budget management UI
-- savings goal management UI
-- recurring planned expense management UI
-- dashboard views for budget health, goal progress, and upcoming planned expenses
+PDF generation can be added later if needed, but it should not be required for v1.
 
-The UI should be responsive from the start and support both desktop and mobile without treating mobile as an afterthought.
+## Page Structure
 
-## UI Direction
+Core routes:
+- `/` landing page
+- `/login`
+- `/signup`
+- `/dashboard`
+- `/transactions`
+- `/transactions/new`
+- `/transactions/[id]/edit`
+- `/reports`
+- `/settings`
+
+### Landing Page
+
+Purpose:
+- explain the product value
+- show a few app highlights
+- drive signup and login
 
-The approved UI direction is a sharper, more kinetic dashboard style based on the selected `C` concept.
+### Dashboard
 
-### Visual Characteristics
+Purpose:
+- serve as the home base after login
+- show income, expenses, and balance
+- highlight recent transactions
+- provide quick access to add a new transaction
+- surface a monthly snapshot
 
-- layered dashboard panels
-- stronger contrast and clearer data emphasis
-- bold progress states
-- modern, data-heavy presentation without looking cluttered
+### Transactions
 
-### Motion Characteristics
+Purpose:
+- show the full transaction list
+- support filters by date, category, and type
+- support edit and delete actions
 
-Motion should be purposeful and tied to user understanding:
+### Reports
 
-- animated progress bars for budgets and goals
-- staggered section reveals on dashboard load
-- subtle count-up or transition effects for key totals
-- smooth workspace and route transitions
-- stronger hover and press feedback on interactive cards and controls
-- visible but controlled status transitions when planned expenses are marked paid or skipped
-
-Animations should improve clarity and feel, not distract from data entry or budget review.
-
-## Primary User Flows
-
-### New User Flow
-
-1. User signs up with email/password
-2. System creates a personal workspace
-3. User lands on the main dashboard
-4. User creates budgets, goals, and recurring planned expenses
-5. User records transactions manually
-
-### Household Flow
-
-1. User creates a household workspace
-2. User invites another member
-3. Members switch into the shared workspace
-4. Members collaborate on shared budgets, goals, recurring expenses, and transactions
-
-### Planned Expense Flow
-
-1. User creates a recurring planned expense
-2. System generates planned instances for the month
-3. User reviews upcoming items
-4. User marks an item paid or skipped
-5. Paid items convert into actual transactions
-
-## Error Handling
-
-The implementation should explicitly handle:
-
-- invalid login attempts
-- duplicate or invalid invites
-- access to workspaces a user does not belong to
-- invalid monetary values or dates
-- invalid category references outside the active workspace
-- accidental double-processing of planned expense instances
-
-The system should fail safely and preserve data integrity around all budget and planned-expense actions.
-
-## Testing Strategy
-
-Priority test coverage:
-
-- authentication flows
-- password hashing and validation behavior
-- workspace access control
-- separation between private and shared workspace data
-- monthly budget calculations
-- goal progress calculations
-- recurring expense instance generation
-- planned instance mark-paid behavior
-- planned instance skip behavior
-- dashboard summary correctness
-
-## Scope Control
-
-This design is intentionally focused enough for a single implementation plan:
-
-- one frontend app
-- one backend API
-- one MySQL database
-- one clear product slice centered on budgeting, goals, and recurring planned expenses
-
-Features outside that slice should be deferred instead of partially implemented.
-
-## Success Criteria
-
-The first version is successful if a user can:
-
-- create an account
-- manage a private workspace
-- create and use a household workspace
-- enter transactions manually
-- create monthly category budgets
-- track savings goals
-- manage recurring planned expenses through paid/skip decisions
-- understand current budget health and goal progress from the dashboard
-
-## Open Decisions Deferred
-
-These are intentionally deferred, not unresolved:
-
-- social login
-- CSV import
-- bank connectivity
-- deeper permissions
-- advanced reporting
-- production deployment hardening
+Purpose:
+- show monthly charts
+- show top spending categories
+- show monthly balance and summary
+- allow export
+
+### Settings
+
+Purpose:
+- manage profile details
+- manage currency preference
+- leave room for future category preferences
+
+## Navigation Design
+
+Desktop:
+- top app bar
+- left sidebar for Dashboard, Transactions, Reports, and Settings
+
+Mobile:
+- compact top bar
+- bottom navigation for Dashboard, Transactions, Reports, and Settings
+- easy-to-reach primary action for adding a transaction
+
+## User Flow
+
+First-run journey:
+1. User lands on the homepage.
+2. User signs up.
+3. User arrives on an empty dashboard.
+4. App encourages the first transaction entry.
+5. User adds income and several expenses.
+6. Dashboard updates totals and balance immediately.
+7. User reviews and filters records on the Transactions page.
+8. User opens Reports at month end to review charts and export a summary.
+
+Primary ongoing loop:
+1. Sign in
+2. Add transactions quickly
+3. Review balance on dashboard
+4. Filter and correct transactions
+5. Review monthly report
+6. Export when needed
+
+## UI and UX Direction
+
+The interface should feel calm, trustworthy, and clear rather than corporate or accounting-heavy.
+
+### Design Principles
+
+- fast transaction entry
+- immediate balance visibility
+- low-friction editing
+- understandable filters
+- confidence-building language
+- strong empty states and validation feedback
+
+### Visual Style
+
+Recommended direction:
+- soft neutral base
+- one confident accent color
+- rounded cards and form controls
+- spacious layout
+- subtle, supportive chart styling
+
+Suggested palette approach:
+- background: warm off-white or light gray
+- text: deep slate
+- accent: teal, emerald, or blue-green
+- income indicators: green
+- expense indicators: coral or red-orange
+
+### Content Tone
+
+The app should prefer plain language over finance jargon. Labels like `Money In`, `Money Out`, and `Balance` may test better than more formal accounting terms.
+
+### Responsive Behavior
+
+On mobile:
+- dashboard cards stack vertically
+- transaction entry opens in a focused page or sheet
+- filters collapse into a simplified control area
+- navigation remains persistent and thumb-friendly
+
+On desktop:
+- dashboard uses a multi-column layout
+- filters can stay visible inline
+- charts and category breakdowns can sit side by side
+
+### Avoid
+
+- spreadsheet-like clutter
+- dense enterprise dashboards
+- overly playful visuals that reduce trust
+- banking-app heaviness
+
+## Security Considerations
+
+The MVP must include:
+- protected authenticated routes
+- strict per-user data scoping
+- server-side validation for all inputs
+- safe password handling through the auth platform
+- environment variable protection
+- export actions limited to the current user's data
+- audit-friendly timestamps on records
+- rate limiting for auth endpoints
+- session and CSRF protections appropriate to the auth implementation
+
+Future hardening:
+- row-level security in Supabase
+- email verification
+- password reset
+- suspicious login detection
+- analytics that avoid exposing sensitive financial details
+
+## Suggested Folder Structure
+
+```text
+src/
+  app/
+    (marketing)/
+      page.tsx
+    (auth)/
+      login/page.tsx
+      signup/page.tsx
+    (dashboard)/
+      dashboard/page.tsx
+      transactions/page.tsx
+      transactions/new/page.tsx
+      transactions/[id]/edit/page.tsx
+      reports/page.tsx
+      settings/page.tsx
+    api/
+  components/
+    ui/
+    layout/
+    charts/
+    forms/
+  features/
+    auth/
+    transactions/
+    reports/
+    categories/
+    settings/
+  lib/
+    auth/
+    db/
+    validation/
+    utils/
+  server/
+    actions/
+    queries/
+  types/
+```
+
+## Monetization Ideas
+
+Primary long-term monetization options:
+- free plus Pro subscription
+- annual Pro plan
+- early adopter lifetime offer
+- future family or shared-account plan
+- future AI insights add-on
+
+### Pricing Direction
+
+Example structure:
+- `Free`: basic tracking and simple reports
+- `Pro`: unlimited transactions, exports, and richer reporting
+- `Pro + AI`: advanced AI summaries and financial insights later
+
+Example pricing range:
+- `Pro`: USD 4 to USD 8 per month
+- `Pro annual`: USD 39 to USD 69 per year
+- `Lifetime early adopter`: USD 79 to USD 129 one-time
+
+## Future SaaS Potential
+
+The architecture should intentionally leave room for:
+- debt tracking
+- savings goals
+- recurring bills
+- budget planning
+- AI monthly summaries
+- overspending alerts
+- shared household accounts
+- receipt upload and OCR
+- multi-currency support
+- mobile app packaging or native apps later
+- bank import integrations
+
+## Development Roadmap
+
+### Phase 1: Foundation
+
+- initialize Next.js with App Router and Tailwind
+- configure Supabase and environment variables
+- set up auth, protected routes, and shared layout
+- define schema and seed default categories
+
+### Phase 2: Core Transactions
+
+- build add, edit, and delete transaction flows
+- build filters for date, category, and type
+- build deterministic category suggestions
+- compute totals for dashboard summaries
+
+### Phase 3: Dashboard and Reports
+
+- build dashboard summary cards
+- show recent transactions
+- build monthly report charts with Recharts
+- show top spending categories and monthly balance
+- add CSV export and print-friendly reporting
+
+### Phase 4: UX Polish
+
+- improve validation, loading, and empty states
+- optimize forms and navigation for mobile
+- refine settings and profile management
+
+### Phase 5: SaaS Readiness
+
+- strengthen security and row-level protections
+- add monitoring and analytics
+- prepare billing boundaries for future Pro plans
+
+## Step-by-Step Development Plan
+
+1. Create the Next.js project with Tailwind and configure the App Router structure.
+2. Connect Supabase and define required environment variables.
+3. Implement authentication and route protection.
+4. Create the database schema for profiles, categories, transactions, and category rules.
+5. Seed default categories and starter keyword mappings.
+6. Build the shared app shell and responsive navigation.
+7. Build the transaction creation flow.
+8. Add automatic category suggestion behavior.
+9. Build transaction list filtering, editing, and deletion.
+10. Build dashboard summaries and recent activity.
+11. Build the monthly reports page with charts.
+12. Add CSV export and print-friendly report output.
+13. Polish UX states, validation, and mobile behavior.
+14. Add rate limiting, security hardening, and monitoring hooks.
+15. Plan follow-up releases for debt tracking, savings goals, and AI insights.
+
+## Open Extension Points
+
+The MVP should be designed so future tables and modules can be added without rewriting the core architecture. Likely future table families:
+- `debts`
+- `debt_payments`
+- `savings_goals`
+- `savings_contributions`
+- `ai_insights`
+- `households`
+- `household_members`
+
+These should remain out of scope for implementation until the MVP core is stable.
