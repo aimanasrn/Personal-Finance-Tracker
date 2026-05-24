@@ -1,2 +1,10 @@
 .worktrees/
 .superpowers/
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+client/node_modules/
+server/node_modules/
+server/generated/
