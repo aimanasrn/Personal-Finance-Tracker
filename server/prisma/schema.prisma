@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceType {
+  PERSONAL
+  HOUSEHOLD
+}
+
+enum WorkspaceRole {
+  OWNER
+  MEMBER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PlannedExpenseStatus {
+  PENDING
+  PAID
+  SKIPPED
+}
+
+model User {
+  id              String            @id @default(cuid())
+  email           String            @unique
+  passwordHash    String
+  createdAt       DateTime          @default(now())
+  memberships     WorkspaceMember[]
+  sentInvites     WorkspaceInvite[] @relation("SentInvites")
+  acceptedInvites WorkspaceInvite[] @relation("AcceptedInvites")
+}
+
+model Workspace {
+  id                      String                  @id @default(cuid())
+  name                    String
+  type                    WorkspaceType
+  createdAt               DateTime                @default(now())
+  members                 WorkspaceMember[]
+  invites                 WorkspaceInvite[]
+  categories              Category[]
+  budgets                 MonthlyBudget[]
+  goals                   SavingsGoal[]
+  transactions            Transaction[]
+  recurringExpenses       RecurringExpense[]
+  plannedExpenseInstances PlannedExpenseInstance[]
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model WorkspaceInvite {
+  id           String     @id @default(cuid())
+  workspaceId  String
+  email        String
+  token        String     @unique
+  invitedById  String
+  acceptedById String?
+  expiresAt    DateTime
+  createdAt    DateTime   @default(now())
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy    User       @relation("SentInvites", fields: [invitedById], references: [id], onDelete: Cascade)
+  acceptedBy   User?      @relation("AcceptedInvites", fields: [acceptedById], references: [id], onDelete: SetNull)
+}
+
+model Category {
+  id                String             @id @default(cuid())
+  workspaceId       String
+  name              String
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  budgets           MonthlyBudget[]
+  transactions      Transaction[]
+  recurringExpenses RecurringExpense[]
+
+  @@unique([workspaceId, name])
+}
+
+model Transaction {
+  id                   String                 @id @default(cuid())
+  workspaceId          String
+  categoryId           String
+  amount               Decimal                @db.Decimal(12, 2)
+  type                 TransactionType
+  date                 DateTime
+  note                 String?
+  createdAt            DateTime               @default(now())
+  workspace            Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category             Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  plannedExpenseSource PlannedExpenseInstance? @relation("PaidTransaction")
+}
+
+model MonthlyBudget {
+  id          String    @id @default(cuid())
+  workspaceId String
+  categoryId  String
+  month       Int
+  year        Int
+  amount      Decimal   @db.Decimal(12, 2)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, categoryId, month, year])
+}
+
+model SavingsGoal {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  name          String
+  targetAmount  Decimal   @db.Decimal(12, 2)
+  currentAmount Decimal   @default(0) @db.Decimal(12, 2)
+  targetDate    DateTime?
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model RecurringExpense {
+  id          String                  @id @default(cuid())
+  workspaceId String
+  categoryId  String
+  name        String
+  amount      Decimal                 @db.Decimal(12, 2)
+  dayOfMonth  Int
+  note        String?
+  active      Boolean                 @default(true)
+  workspace   Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category    Category                @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  instances   PlannedExpenseInstance[]
+}
+
+model PlannedExpenseInstance {
+  id                 String               @id @default(cuid())
+  workspaceId        String
+  recurringExpenseId String
+  scheduledFor       DateTime
+  status             PlannedExpenseStatus @default(PENDING)
+  paidTransactionId  String?              @unique
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  recurringExpense   RecurringExpense     @relation(fields: [recurringExpenseId], references: [id], onDelete: Cascade)
+  paidTransaction    Transaction?         @relation("PaidTransaction", fields: [paidTransactionId], references: [id], onDelete: SetNull)
+
+  @@unique([recurringExpenseId, scheduledFor])
+}

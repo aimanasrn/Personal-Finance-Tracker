@@ -5,6 +5,7 @@ dist/
 coverage/
 .env
 .env.*
+!server/.env.example
 client/node_modules/
 server/node_modules/
 server/generated/
