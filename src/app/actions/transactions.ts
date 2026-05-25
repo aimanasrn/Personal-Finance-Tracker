@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { ZodError, z } from "zod";
 import { requireUserId } from "@/lib/auth/session";
 import type { CategoryRecord, TransactionRecord, TransactionType, UUID } from "@/lib/db/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -7,6 +8,10 @@ import {
   transactionSchema,
   type TransactionInput
 } from "../../lib/validation/transactions";
+
+const transactionIdSchema = z.uuid();
+const transactionNotFoundMessage =
+  "We couldn't find that transaction. Refresh the ledger and try again.";
 
 export type TransactionCategoryOption = Pick<
   CategoryRecord,
@@ -61,12 +66,21 @@ function buildRedirect(pathname: string, key: "message" | "error", value: string
   return `${pathname}?${searchParams.toString()}`;
 }
 
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message.trim().length > 0) {
-    return error.message;
+function getErrorMessage(error: unknown, fallbackMessage: string) {
+  if (error instanceof ZodError) {
+    return error.issues[0]?.message ?? fallbackMessage;
   }
 
-  return "Something went wrong while saving the transaction.";
+  if (error instanceof Error && error.message.trim().length > 0) {
+    if (
+      error.message === "Select a valid category for this transaction." ||
+      error.message === transactionNotFoundMessage
+    ) {
+      return error.message;
+    }
+  }
+
+  return fallbackMessage;
 }
 
 function toDatabasePayload(userId: string, input: TransactionInput) {
@@ -118,6 +132,7 @@ async function validateTransactionCategory(
     .from("categories")
     .select("id, type")
     .eq("id", categoryId)
+    // This app-side scope check complements future database-enforced RLS.
     .or(`user_id.is.null,user_id.eq.${userId}`)
     .maybeSingle();
 
@@ -128,6 +143,32 @@ async function validateTransactionCategory(
   if (!data || data.type !== expectedType) {
     throw new Error("Select a valid category for this transaction.");
   }
+}
+
+async function ensureOwnedTransaction(userId: string, id: string) {
+  const parsedId = transactionIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    throw new Error(transactionNotFoundMessage);
+  }
+
+  const supabase = createServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("id")
+    .eq("id", parsedId.data)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    throw new Error(transactionNotFoundMessage);
+  }
+
+  return parsedId.data;
 }
 
 export function normalizeTransactionInput(formData: FormData): TransactionInput {
@@ -152,7 +193,14 @@ export async function createTransactionAction(formData: FormData): Promise<void>
     payload = normalizeTransactionInput(formData);
   } catch (error) {
     redirect(
-      buildRedirect("/transactions/new", "error", getErrorMessage(error))
+      buildRedirect(
+        "/transactions/new",
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't save your transaction yet. Please check the form and try again."
+        )
+      )
     );
   }
 
@@ -160,7 +208,14 @@ export async function createTransactionAction(formData: FormData): Promise<void>
     await validateTransactionCategory(userId, payload.categoryId, payload.type);
   } catch (error) {
     redirect(
-      buildRedirect("/transactions/new", "error", getErrorMessage(error))
+      buildRedirect(
+        "/transactions/new",
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't save your transaction yet. Please check the form and try again."
+        )
+      )
     );
   }
 
@@ -171,7 +226,14 @@ export async function createTransactionAction(formData: FormData): Promise<void>
 
   if (error) {
     redirect(
-      buildRedirect("/transactions/new", "error", getErrorMessage(error))
+      buildRedirect(
+        "/transactions/new",
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't save your transaction just now. Please try again."
+        )
+      )
     );
   }
 
@@ -187,14 +249,35 @@ export async function updateTransactionAction(
   "use server";
 
   const userId = await requireUserId();
+  const editPath = `/transactions/${id}/edit`;
 
   let payload: TransactionInput;
+  let transactionId: string;
 
   try {
     payload = normalizeTransactionInput(formData);
   } catch (error) {
     redirect(
-      buildRedirect(`/transactions/${id}/edit`, "error", getErrorMessage(error))
+      buildRedirect(
+        editPath,
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't save your transaction yet. Please check the form and try again."
+        )
+      )
+    );
+  }
+
+  try {
+    transactionId = await ensureOwnedTransaction(userId, id);
+  } catch (error) {
+    redirect(
+      buildRedirect(
+        "/transactions",
+        "error",
+        getErrorMessage(error, transactionNotFoundMessage)
+      )
     );
   }
 
@@ -202,7 +285,14 @@ export async function updateTransactionAction(
     await validateTransactionCategory(userId, payload.categoryId, payload.type);
   } catch (error) {
     redirect(
-      buildRedirect(`/transactions/${id}/edit`, "error", getErrorMessage(error))
+      buildRedirect(
+        editPath,
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't save your transaction yet. Please check the form and try again."
+        )
+      )
     );
   }
 
@@ -211,18 +301,25 @@ export async function updateTransactionAction(
     .from("transactions")
     .update(toDatabaseUpdate(payload))
     .match({
-      id,
+      id: transactionId,
       user_id: userId
     });
 
   if (error) {
     redirect(
-      buildRedirect(`/transactions/${id}/edit`, "error", getErrorMessage(error))
+      buildRedirect(
+        editPath,
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't update that transaction just now. Please try again."
+        )
+      )
     );
   }
 
   revalidatePath("/transactions");
-  revalidatePath(`/transactions/${id}/edit`);
+  revalidatePath(editPath);
   revalidatePath("/dashboard");
   redirect(buildRedirect("/transactions", "message", "Transaction updated."));
 }
@@ -231,17 +328,40 @@ export async function deleteTransactionAction(id: string): Promise<void> {
   "use server";
 
   const userId = await requireUserId();
+  let transactionId: string;
+
+  try {
+    transactionId = await ensureOwnedTransaction(userId, id);
+  } catch (error) {
+    redirect(
+      buildRedirect(
+        "/transactions",
+        "error",
+        getErrorMessage(error, transactionNotFoundMessage)
+      )
+    );
+  }
+
   const supabase = createServerSupabaseClient();
   const { error } = await supabase
     .from("transactions")
     .delete()
     .match({
-      id,
+      id: transactionId,
       user_id: userId
     });
 
   if (error) {
-    redirect(buildRedirect("/transactions", "error", getErrorMessage(error)));
+    redirect(
+      buildRedirect(
+        "/transactions",
+        "error",
+        getErrorMessage(
+          error,
+          "We couldn't delete that transaction just now. Please try again."
+        )
+      )
+    );
   }
 
   revalidatePath("/transactions");

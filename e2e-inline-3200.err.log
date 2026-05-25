@@ -1,0 +1,136 @@
+⨯ Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at getCurrentUser (src\lib\auth\session.ts:90:46)
+    at async requireUserId (src\lib\auth\session.ts:125:16)
+    at async ProtectedAppShell (src\components\layout\app-shell.tsx:55:18)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value; {
+  digest: '3199316454'
+}
+[browser] Uncaught Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at getCurrentUser (src\lib\auth\session.ts:90:46)
+    at  requireUserId (src\lib\auth\session.ts:125:16)
+    at  ProtectedAppShell (src\components\layout\app-shell.tsx:55:18)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value;
+⨯ Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at signUpAction (src\app\actions\auth.ts:127:46)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value; {
+  digest: '2847503980'
+}
+⨯ Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at signUpAction (src\app\actions\auth.ts:127:46)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value; {
+  digest: '2847503980'
+}
+⨯ Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at getCurrentUser (src\lib\auth\session.ts:90:46)
+    at async requireUserId (src\lib\auth\session.ts:125:16)
+    at async ReportsPage (src\app\reports\page.tsx:293:18)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value; {
+  digest: '837022113'
+}
+⨯ Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at getCurrentUser (src\lib\auth\session.ts:90:46)
+    at async requireUserId (src\lib\auth\session.ts:125:16)
+    at async NewTransactionPage (src\app\transactions\new\page.tsx:34:18)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value; {
+  digest: '121138667'
+}
+[browser] Uncaught Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at signUpAction (src\app\actions\auth.ts:127:46)
+    at form (<anonymous>)
+    at SignupPage (src\app\signup\page.tsx:33:7)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value;
+[browser] Uncaught Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at signUpAction (src\app\actions\auth.ts:127:46)
+    at form (<anonymous>)
+    at SignupPage (src\app\signup\page.tsx:33:7)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value;
+[browser] Uncaught Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at getCurrentUser (src\lib\auth\session.ts:90:46)
+    at  requireUserId (src\lib\auth\session.ts:125:16)
+    at  NewTransactionPage (src\app\transactions\new\page.tsx:34:18)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value;
+[browser] Uncaught Error: NEXT_PUBLIC_SUPABASE_URL is not configured.
+    at getSupabaseUrl (src\lib\supabase\server.ts:11:11)
+    at createServerSupabaseClient (src\lib\supabase\server.ts:32:23)
+    at getCurrentUser (src\lib\auth\session.ts:90:46)
+    at  requireUserId (src\lib\auth\session.ts:125:16)
+    at  ReportsPage (src\app\reports\page.tsx:293:18)
+   9 |
+  10 |   if (!value) {
+> 11 |     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+     |           ^
+  12 |   }
+  13 |
+  14 |   return value;

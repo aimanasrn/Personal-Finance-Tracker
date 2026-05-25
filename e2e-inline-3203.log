@@ -1,0 +1,9 @@
+
+> personal-finance-tracker@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3203
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://127.0.0.1:3203
+- Network:       http://127.0.0.1:3203
+✓ Ready in 1110ms
+[?25h

@@ -1,7 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { buildMonthlyReport } from "./monthly-report";
+import {
+  buildMonthlyReport,
+  buildMonthlyReportFromMonths,
+  formatMonthLabel,
+  getCurrentMonthKey,
+  getPreviousMonthKey,
+  isValidMonthKey,
+  shiftMonthKey
+} from "./monthly-report";
 
 describe("buildMonthlyReport", () => {
+  it("validates, labels, and shifts month keys without local timezone drift", () => {
+    expect(isValidMonthKey("2026-05")).toBe(true);
+    expect(isValidMonthKey("2026-13")).toBe(false);
+    expect(formatMonthLabel("2026-05")).toBe("May 2026");
+    expect(getPreviousMonthKey("2026-01")).toBe("2025-12");
+    expect(shiftMonthKey("2026-12", 1)).toBe("2027-01");
+  });
+
+  it("derives the current month key from UTC month boundaries", () => {
+    expect(getCurrentMonthKey(new Date("2026-05-31T23:30:00.000-07:00"))).toBe(
+      "2026-06"
+    );
+  });
+
   it("computes totals for the selected month", () => {
     const report = buildMonthlyReport(
       [
@@ -222,5 +244,52 @@ describe("buildMonthlyReport", () => {
 
     expect(report.previousMonth).toBeNull();
     expect(report.comparison).toBeNull();
+  });
+
+  it("builds a report from month-scoped inputs without needing full history", () => {
+    const report = buildMonthlyReportFromMonths({
+      monthKey: "2026-05",
+      currentMonthItems: [
+        {
+          id: "tx-1",
+          title: "May salary",
+          amount: 4200,
+          type: "income",
+          categoryName: "Salary",
+          transactionDate: "2026-05-01"
+        },
+        {
+          id: "tx-2",
+          title: "May rent",
+          amount: 1200,
+          type: "expense",
+          categoryName: "Housing",
+          transactionDate: "2026-05-02"
+        }
+      ],
+      previousMonthItems: [
+        {
+          id: "tx-3",
+          title: "April salary",
+          amount: 4000,
+          type: "income",
+          categoryName: "Salary",
+          transactionDate: "2026-04-01"
+        }
+      ]
+    });
+
+    expect(report.monthKey).toBe("2026-05");
+    expect(report.monthLabel).toBe("May 2026");
+    expect(report.totalIncome).toBe(4200);
+    expect(report.totalExpenses).toBe(1200);
+    expect(report.previousMonth).toEqual({
+      monthKey: "2026-04",
+      monthLabel: "April 2026",
+      totalIncome: 4000,
+      totalExpenses: 0,
+      balance: 4000,
+      transactionCount: 1
+    });
   });
 });

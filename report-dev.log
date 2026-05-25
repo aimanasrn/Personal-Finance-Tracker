@@ -1,0 +1,14 @@
+
+> personal-finance-tracker@0.1.0 dev
+> next dev --hostname 127.0.0.1
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+✓ Ready in 1158ms
+Creating turbopack project {
+  dir: 'C:\\Users\\ASUS\\Documents\\GitHub\\Personal-Finance-Tracker',
+  testMode: true
+}
+
+ GET /signup 200 in 1212ms (next.js: 648ms, application-code: 565ms)

@@ -1,0 +1,32 @@
+
+> personal-finance-tracker@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3202
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://127.0.0.1:3202
+- Network:       http://127.0.0.1:3202
+✓ Ready in 1194ms
+Creating turbopack project {
+  dir: 'C:\\Users\\ASUS\\Documents\\GitHub\\Personal-Finance-Tracker',
+  testMode: true
+}
+
+ GET /login 200 in 837ms (next.js: 458ms, application-code: 379ms)
+ GET /signup 200 in 692ms (next.js: 166ms, application-code: 526ms)
+ GET /settings 307 in 451ms (next.js: 183ms, application-code: 268ms)
+ GET /signup 200 in 488ms (next.js: 27ms, application-code: 460ms)
+ GET /login 200 in 354ms (next.js: 30ms, application-code: 324ms)
+ GET /signup 200 in 700ms (next.js: 40ms, application-code: 659ms)
+ GET /reports?month=2026-05 307 in 1688ms (next.js: 405ms, application-code: 1283ms)
+ GET /transactions/new 307 in 1109ms (next.js: 207ms, application-code: 902ms)
+ GET /signup?error=We+couldn%27t+verify+your+account+details+right+now.+Please+try+again. 200 in 667ms (next.js: 111ms, application-code: 555ms)
+ GET /signup?error=We+couldn%27t+verify+your+account+details+right+now.+Please+try+again. 200 in 449ms (next.js: 46ms, application-code: 403ms)
+ POST /signup 303 in 1332ms (next.js: 86ms, application-code: 1247ms)
+  └─ ƒ signUpAction({}) in 439ms src/app/actions/auth.ts
+ POST /signup 303 in 2.1s (next.js: 42ms, application-code: 2.1s)
+  └─ ƒ signUpAction({}) in 961ms src/app/actions/auth.ts
+ GET /login 200 in 522ms (next.js: 40ms, application-code: 482ms)
+ GET /signup?error=We+couldn%27t+verify+your+account+details+right+now.+Please+try+again. 200 in 114ms (next.js: 13ms, application-code: 101ms)
+ GET /login 200 in 305ms (next.js: 57ms, application-code: 248ms)
+ POST /signup 303 in 353ms (next.js: 24ms, application-code: 329ms)
+  └─ ƒ signUpAction({}) in 126ms src/app/actions/auth.ts

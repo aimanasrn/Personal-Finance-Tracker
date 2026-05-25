@@ -2,21 +2,30 @@ import Link from "next/link";
 import { listTransactions, type TransactionListItem } from "@/app/actions/transactions";
 import { AppShell } from "@/components/layout/app-shell";
 import { MonthlyChart } from "@/components/reports/monthly-chart";
+import { PrintReportButton } from "@/components/reports/print-report-button";
 import { TopCategories } from "@/components/reports/top-categories";
 import { requireUserId } from "@/lib/auth/session";
-import { buildMonthlyReport } from "@/lib/reports/monthly-report";
+import {
+  buildMonthlyReportFromMonths,
+  createMonthlyReportScope,
+  formatMonthLabel,
+  isValidMonthKey,
+  shiftMonthKey
+} from "@/lib/reports/monthly-report";
 
 const currencyFormatter = new Intl.NumberFormat("en-MY", {
   style: "currency",
   currency: "MYR"
 });
 
-function formatCurrency(amount: number) {
-  return currencyFormatter.format(amount);
+function getLocalCurrentMonthKey(referenceDate = new Date()) {
+  const year = referenceDate.getFullYear();
+  const month = `${referenceDate.getMonth() + 1}`.padStart(2, "0");
+  return `${year}-${month}`;
 }
 
-function isValidMonthKey(value: string | undefined): value is string {
-  return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+function formatCurrency(amount: number) {
+  return currencyFormatter.format(amount);
 }
 
 function readSelectedMonthKey(
@@ -29,21 +38,7 @@ function readSelectedMonthKey(
     return monthValue;
   }
 
-  return getCurrentMonthKey();
-}
-
-function getCurrentMonthKey(referenceDate = new Date()) {
-  const year = referenceDate.getFullYear();
-  const month = `${referenceDate.getMonth() + 1}`.padStart(2, "0");
-  return `${year}-${month}`;
-}
-
-function shiftMonthKey(monthKey: string, offset: number) {
-  const [year, month] = monthKey.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, 1));
-  date.setUTCMonth(date.getUTCMonth() + offset);
-
-  return getCurrentMonthKey(date);
+  return getLocalCurrentMonthKey();
 }
 
 function formatDelta(amount: number) {
@@ -107,15 +102,21 @@ function ReportsContent({
   items: TransactionListItem[];
   selectedMonthKey: string;
 }) {
-  const report = buildMonthlyReport(items, { monthKey: selectedMonthKey });
-  const previousMonthKey = shiftMonthKey(selectedMonthKey, -1);
-  const nextMonthKey = shiftMonthKey(selectedMonthKey, 1);
-  const currentMonthKey = getCurrentMonthKey();
+  const report = buildMonthlyReportFromMonths(
+    createMonthlyReportScope(items, selectedMonthKey)
+  );
+  const exportHref = `/api/export/monthly?month=${selectedMonthKey}`;
+  const previousMonthKey = shiftMonthKey(selectedMonthKey, -1) ?? selectedMonthKey;
+  const nextMonthKey = shiftMonthKey(selectedMonthKey, 1) ?? selectedMonthKey;
+  const currentMonthKey = getLocalCurrentMonthKey();
   const canGoForward = nextMonthKey <= currentMonthKey;
 
   return (
-    <>
-      <section className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
+    <div
+      id="monthly-report-content"
+      className="space-y-6 print:space-y-4"
+    >
+      <section className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100 print:rounded-none print:border print:border-slate-200 print:p-4 print:shadow-none print:ring-0">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-900">
@@ -146,7 +147,7 @@ function ReportsContent({
           </form>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
           <Link
             href={`/reports?month=${previousMonthKey}`}
             className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
@@ -168,9 +169,22 @@ function ReportsContent({
             </Link>
           ) : null}
         </div>
+
+        <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
+          <Link
+            href={exportHref}
+            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-brand-700 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
+          >
+            Export CSV
+          </Link>
+          <PrintReportButton />
+          <p className="text-sm text-slate-500">
+            Export or print the {formatMonthLabel(selectedMonthKey)} report.
+          </p>
+        </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3 print:grid-cols-3">
         <MetricCard
           label={`${report.monthLabel} income`}
           value={report.totalIncome}
@@ -197,7 +211,7 @@ function ReportsContent({
         />
       </section>
 
-      <section className="mt-6 rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
+      <section className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100 print:rounded-none print:border print:border-slate-200 print:p-4 print:shadow-none print:ring-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-900">
@@ -242,20 +256,20 @@ function ReportsContent({
         )}
       </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
+      <section className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr] print:grid-cols-1">
         <MonthlyChart
           monthLabel={report.monthLabel}
           income={report.totalIncome}
           expenses={report.totalExpenses}
         />
         <TopCategories
-          items={report.topCategories}
+          items={report.topCategories.slice(0, 5)}
           monthLabel={report.monthLabel}
         />
       </section>
 
       {report.transactionCount === 0 ? (
-        <section className="mt-6 rounded-[1.75rem] border border-dashed border-slate-200 bg-stone-50 px-6 py-6">
+        <section className="rounded-[1.75rem] border border-dashed border-slate-200 bg-stone-50 px-6 py-6 print:rounded-none print:border print:border-slate-200 print:bg-white print:px-4 print:py-4">
           <h2 className="text-lg font-semibold text-slate-900">
             No transactions recorded for this month
           </h2>
@@ -265,7 +279,7 @@ function ReportsContent({
           </p>
         </section>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -286,10 +300,7 @@ export default async function ReportsPage({
   try {
     items = await listTransactions(userId);
   } catch (loadFailure) {
-    loadError =
-      loadFailure instanceof Error
-        ? loadFailure.message
-        : "Unable to load reporting data right now.";
+    loadError = "Unable to load reporting data right now.";
   }
 
   return (

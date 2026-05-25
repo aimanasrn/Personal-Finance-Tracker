@@ -32,7 +32,7 @@ export function TopCategories({ items, monthLabel }: TopCategoriesProps) {
         </div>
       ) : (
         <ul className="mt-6 space-y-4">
-          {items.slice(0, 5).map((item) => (
+          {items.map((item) => (
             <li key={item.name}>
               <div className="flex items-center justify-between gap-4">
                 <div>

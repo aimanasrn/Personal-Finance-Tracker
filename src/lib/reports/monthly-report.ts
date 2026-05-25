@@ -42,13 +42,18 @@ export type MonthlyReport = {
     | null;
 };
 
-function getMonthKey(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  return `${year}-${month}`;
-}
+export type MonthlyReportMonthScope = {
+  monthKey: string;
+  currentMonthItems: MonthlyReportTransaction[];
+  previousMonthItems?: MonthlyReportTransaction[];
+};
 
-function parseMonthKey(monthKey: string) {
+type ParsedMonthKey = {
+  year: number;
+  monthIndex: number;
+};
+
+function parseMonthKey(monthKey: string): ParsedMonthKey | null {
   const match = monthKey.match(/^(\d{4})-(\d{2})$/);
 
   if (!match) {
@@ -62,36 +67,32 @@ function parseMonthKey(monthKey: string) {
     return null;
   }
 
-  return new Date(Date.UTC(year, monthIndex, 1));
+  return { year, monthIndex };
 }
 
-function formatMonthLabel(date: Date) {
-  return new Intl.DateTimeFormat("en-MY", {
-    month: "long",
-    year: "numeric"
-  }).format(date);
+function toMonthKey({ year, monthIndex }: ParsedMonthKey) {
+  return `${year}-${`${monthIndex + 1}`.padStart(2, "0")}`;
 }
 
-function getPreviousMonthKey(monthKey: string) {
-  const monthDate = parseMonthKey(monthKey);
+function createMonthDate(monthKey: string) {
+  const parsedMonthKey = parseMonthKey(monthKey);
 
-  if (!monthDate) {
+  if (!parsedMonthKey) {
     return null;
   }
 
-  monthDate.setUTCMonth(monthDate.getUTCMonth() - 1);
-  return getMonthKey(monthDate);
+  return new Date(
+    Date.UTC(parsedMonthKey.year, parsedMonthKey.monthIndex, 1, 12)
+  );
 }
 
-function buildMonthSnapshot(
+function summarizeMonth(
   items: MonthlyReportTransaction[],
   monthKey: string
 ): MonthlyComparisonSnapshot & {
   byCategory: Record<string, number>;
 } {
-  const monthDate = parseMonthKey(monthKey) ?? new Date(`${monthKey}-01T00:00:00.000Z`);
-  const monthItems = items.filter((item) => item.transactionDate.startsWith(monthKey));
-  const totals = monthItems.reduce(
+  const totals = items.reduce(
     (summary, item) => {
       if (item.type === "income") {
         summary.totalIncome += item.amount;
@@ -112,8 +113,8 @@ function buildMonthSnapshot(
 
   return {
     monthKey,
-    monthLabel: formatMonthLabel(monthDate),
-    transactionCount: monthItems.length,
+    monthLabel: formatMonthLabel(monthKey),
+    transactionCount: items.length,
     totalIncome: totals.totalIncome,
     totalExpenses: totals.totalExpenses,
     balance: totals.totalIncome - totals.totalExpenses,
@@ -121,20 +122,98 @@ function buildMonthSnapshot(
   };
 }
 
-export function buildMonthlyReport(
+function buildTopCategories(
+  categoryTotals: Record<string, number>,
+  totalExpenses: number
+) {
+  return Object.entries(categoryTotals)
+    .map(([name, amount]) => ({
+      name,
+      amount,
+      share: totalExpenses === 0 ? 0 : amount / totalExpenses
+    }))
+    .sort((left, right) => {
+      if (right.amount !== left.amount) {
+        return right.amount - left.amount;
+      }
+
+      return left.name.localeCompare(right.name);
+    });
+}
+
+export function isValidMonthKey(monthKey: string | undefined): monthKey is string {
+  return typeof monthKey === "string" && parseMonthKey(monthKey) !== null;
+}
+
+export function getCurrentMonthKey(referenceDate = new Date()) {
+  return toMonthKey({
+    year: referenceDate.getFullYear(),
+    monthIndex: referenceDate.getMonth()
+  });
+}
+
+export function formatMonthLabel(monthKey: string) {
+  const monthDate = createMonthDate(monthKey);
+
+  if (!monthDate) {
+    return monthKey;
+  }
+
+  return new Intl.DateTimeFormat("en-MY", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(monthDate);
+}
+
+export function shiftMonthKey(monthKey: string, offset: number) {
+  const parsedMonthKey = parseMonthKey(monthKey);
+
+  if (!parsedMonthKey) {
+    return null;
+  }
+
+  const shiftedMonthIndex = parsedMonthKey.monthIndex + offset;
+  const shiftedYear =
+    parsedMonthKey.year + Math.floor(shiftedMonthIndex / 12);
+  const normalizedMonthIndex = ((shiftedMonthIndex % 12) + 12) % 12;
+
+  return toMonthKey({
+    year: shiftedYear,
+    monthIndex: normalizedMonthIndex
+  });
+}
+
+export function getPreviousMonthKey(monthKey: string) {
+  return shiftMonthKey(monthKey, -1);
+}
+
+export function createMonthlyReportScope(
   items: MonthlyReportTransaction[],
-  reference:
-    | Date
-    | {
-        monthKey: string;
-      } = new Date()
-): MonthlyReport {
-  const monthKey =
-    reference instanceof Date ? getMonthKey(reference) : reference.monthKey;
-  const currentMonth = buildMonthSnapshot(items, monthKey);
+  monthKey: string
+): MonthlyReportMonthScope {
+  const previousMonthKey = getPreviousMonthKey(monthKey);
+
+  return {
+    monthKey,
+    currentMonthItems: items.filter((item) =>
+      item.transactionDate.startsWith(monthKey)
+    ),
+    previousMonthItems: previousMonthKey
+      ? items.filter((item) => item.transactionDate.startsWith(previousMonthKey))
+      : []
+  };
+}
+
+export function buildMonthlyReportFromMonths({
+  monthKey,
+  currentMonthItems,
+  previousMonthItems = []
+}: MonthlyReportMonthScope): MonthlyReport {
+  const currentMonth = summarizeMonth(currentMonthItems, monthKey);
   const previousMonthKey = getPreviousMonthKey(monthKey);
   const previousMonthSnapshot = previousMonthKey
-    ? buildMonthSnapshot(items, previousMonthKey)
+    ? summarizeMonth(previousMonthItems, previousMonthKey)
     : null;
   const previousMonth =
     previousMonthSnapshot && previousMonthSnapshot.transactionCount > 0
@@ -148,20 +227,6 @@ export function buildMonthlyReport(
         }
       : null;
 
-  const topCategories = Object.entries(currentMonth.byCategory)
-    .map(([name, amount]) => ({
-      name,
-      amount,
-      share: currentMonth.totalExpenses === 0 ? 0 : amount / currentMonth.totalExpenses
-    }))
-    .sort((left, right) => {
-      if (right.amount !== left.amount) {
-        return right.amount - left.amount;
-      }
-
-      return left.name.localeCompare(right.name);
-    });
-
   return {
     monthKey: currentMonth.monthKey,
     monthLabel: currentMonth.monthLabel,
@@ -169,7 +234,10 @@ export function buildMonthlyReport(
     totalIncome: currentMonth.totalIncome,
     totalExpenses: currentMonth.totalExpenses,
     balance: currentMonth.balance,
-    topCategories,
+    topCategories: buildTopCategories(
+      currentMonth.byCategory,
+      currentMonth.totalExpenses
+    ),
     previousMonth,
     comparison: previousMonth
       ? {
@@ -180,4 +248,18 @@ export function buildMonthlyReport(
         }
       : null
   };
+}
+
+export function buildMonthlyReport(
+  items: MonthlyReportTransaction[],
+  reference:
+    | Date
+    | {
+        monthKey: string;
+      } = new Date()
+): MonthlyReport {
+  const monthKey =
+    reference instanceof Date ? getCurrentMonthKey(reference) : reference.monthKey;
+
+  return buildMonthlyReportFromMonths(createMonthlyReportScope(items, monthKey));
 }

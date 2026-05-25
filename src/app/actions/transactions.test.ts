@@ -192,12 +192,28 @@ describe("transaction actions", () => {
   });
 
   it("updates a transaction within the authenticated user's scope", async () => {
+    const transactionId = "550e8400-e29b-41d4-a716-446655440007";
     const categoryQuery = createCategoryQueryMock({
       data: {
         id: "550e8400-e29b-41d4-a716-446655440000",
         type: "expense"
       },
       error: null
+    });
+    const ownedTransactionQuery = {
+      maybeSingleMock: vi.fn().mockResolvedValue({
+        data: { id: transactionId },
+        error: null
+      })
+    };
+    const ownedTransactionEqUserIdMock = vi.fn().mockReturnValue({
+      maybeSingle: ownedTransactionQuery.maybeSingleMock
+    });
+    const ownedTransactionEqIdMock = vi.fn().mockReturnValue({
+      eq: ownedTransactionEqUserIdMock
+    });
+    const ownedTransactionSelectMock = vi.fn().mockReturnValue({
+      eq: ownedTransactionEqIdMock
     });
     const matchMock = vi.fn().mockResolvedValue({ error: null });
     const updateMock = vi.fn().mockReturnValue({
@@ -212,6 +228,7 @@ describe("transaction actions", () => {
 
       if (table === "transactions") {
         return {
+          select: ownedTransactionSelectMock,
           update: updateMock
         };
       }
@@ -229,7 +246,7 @@ describe("transaction actions", () => {
 
     const { updateTransactionAction } = await import("./transactions");
 
-    await expect(updateTransactionAction("tx-7", formData)).rejects.toThrow(
+    await expect(updateTransactionAction(transactionId, formData)).rejects.toThrow(
       "REDIRECT:/transactions?message=Transaction+updated."
     );
 
@@ -242,18 +259,33 @@ describe("transaction actions", () => {
       notes: "Airport"
     });
     expect(matchMock).toHaveBeenCalledWith({
-      id: "tx-7",
+      id: transactionId,
       user_id: "user-123"
     });
+    expect(ownedTransactionSelectMock).toHaveBeenCalledWith("id");
   });
 
   it("rejects updates when the category type does not match the transaction type", async () => {
+    const transactionId = "550e8400-e29b-41d4-a716-446655440008";
     const categoryQuery = createCategoryQueryMock({
       data: {
         id: "550e8400-e29b-41d4-a716-446655440000",
         type: "income"
       },
       error: null
+    });
+    const maybeSingleMock = vi.fn().mockResolvedValue({
+      data: { id: transactionId },
+      error: null
+    });
+    const eqUserIdMock = vi.fn().mockReturnValue({
+      maybeSingle: maybeSingleMock
+    });
+    const eqIdMock = vi.fn().mockReturnValue({
+      eq: eqUserIdMock
+    });
+    const selectMock = vi.fn().mockReturnValue({
+      eq: eqIdMock
     });
     const updateMock = vi.fn();
     fromMock.mockImplementation((table: string) => {
@@ -265,6 +297,7 @@ describe("transaction actions", () => {
 
       if (table === "transactions") {
         return {
+          select: selectMock,
           update: updateMock
         };
       }
@@ -281,31 +314,136 @@ describe("transaction actions", () => {
 
     const { updateTransactionAction } = await import("./transactions");
 
-    await expect(updateTransactionAction("tx-7", formData)).rejects.toThrow(
-      "REDIRECT:/transactions/tx-7/edit?error=Select+a+valid+category+for+this+transaction."
+    await expect(updateTransactionAction(transactionId, formData)).rejects.toThrow(
+      `REDIRECT:/transactions/${transactionId}/edit?error=Select+a+valid+category+for+this+transaction.`
     );
 
     expect(updateMock).not.toHaveBeenCalled();
   });
 
+  it("rejects updates for malformed transaction identifiers before querying persistence", async () => {
+    const formData = new FormData();
+    formData.set("title", "Grab ride home");
+    formData.set("amount", "19.4");
+    formData.set("type", "expense");
+    formData.set("categoryId", "550e8400-e29b-41d4-a716-446655440000");
+    formData.set("transactionDate", "2026-05-20");
+
+    const { updateTransactionAction } = await import("./transactions");
+
+    await expect(
+      updateTransactionAction("not-a-valid-uuid", formData)
+    ).rejects.toThrow(
+      "REDIRECT:/transactions?error=We+couldn%27t+find+that+transaction.+Refresh+the+ledger+and+try+again."
+    );
+
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it("redirects delete requests with a friendly error when the transaction identifier is malformed", async () => {
+    const { deleteTransactionAction } = await import("./transactions");
+
+    await expect(deleteTransactionAction("not-a-valid-uuid")).rejects.toThrow(
+      "REDIRECT:/transactions?error=We+couldn%27t+find+that+transaction.+Refresh+the+ledger+and+try+again."
+    );
+
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it("does not report a successful update when no owned transaction matches the identifier", async () => {
+    const categoryQuery = createCategoryQueryMock({
+      data: {
+        id: "550e8400-e29b-41d4-a716-446655440000",
+        type: "expense"
+      },
+      error: null
+    });
+    const eqUserIdMock = vi.fn().mockResolvedValue({
+      data: null,
+      error: null
+    });
+    const eqIdMock = vi.fn().mockReturnValue({
+      eq: eqUserIdMock
+    });
+    const transactionSelectMock = vi.fn().mockReturnValue({
+      eq: eqIdMock
+    });
+    const updateMock = vi.fn();
+
+    fromMock.mockImplementation((table: string) => {
+      if (table === "categories") {
+        return {
+          select: categoryQuery.selectMock
+        };
+      }
+
+      if (table === "transactions") {
+        return {
+          select: transactionSelectMock,
+          update: updateMock
+        };
+      }
+
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const formData = new FormData();
+    formData.set("title", "Grab ride home");
+    formData.set("amount", "19.4");
+    formData.set("type", "expense");
+    formData.set("categoryId", "550e8400-e29b-41d4-a716-446655440000");
+    formData.set("transactionDate", "2026-05-20");
+
+    const { updateTransactionAction } = await import("./transactions");
+
+    await expect(
+      updateTransactionAction("550e8400-e29b-41d4-a716-446655440001", formData)
+    ).rejects.toThrow(
+      "REDIRECT:/transactions?error=We+couldn%27t+find+that+transaction.+Refresh+the+ledger+and+try+again."
+    );
+
+    expect(transactionSelectMock).toHaveBeenCalledWith("id");
+    expect(eqIdMock).toHaveBeenCalledWith(
+      "id",
+      "550e8400-e29b-41d4-a716-446655440001"
+    );
+    expect(eqUserIdMock).toHaveBeenCalledWith("user_id", "user-123");
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
   it("deletes a transaction within the authenticated user's scope", async () => {
+    const transactionId = "550e8400-e29b-41d4-a716-446655440009";
+    const maybeSingleMock = vi.fn().mockResolvedValue({
+      data: { id: transactionId },
+      error: null
+    });
+    const eqUserIdMock = vi.fn().mockReturnValue({
+      maybeSingle: maybeSingleMock
+    });
+    const eqIdMock = vi.fn().mockReturnValue({
+      eq: eqUserIdMock
+    });
+    const selectMock = vi.fn().mockReturnValue({
+      eq: eqIdMock
+    });
     const matchMock = vi.fn().mockResolvedValue({ error: null });
     const deleteMock = vi.fn().mockReturnValue({
       match: matchMock
     });
     fromMock.mockReturnValue({
+      select: selectMock,
       delete: deleteMock
     });
 
     const { deleteTransactionAction } = await import("./transactions");
 
-    await expect(deleteTransactionAction("tx-9")).rejects.toThrow(
+    await expect(deleteTransactionAction(transactionId)).rejects.toThrow(
       "REDIRECT:/transactions?message=Transaction+deleted."
     );
 
     expect(deleteMock).toHaveBeenCalledTimes(1);
     expect(matchMock).toHaveBeenCalledWith({
-      id: "tx-9",
+      id: transactionId,
       user_id: "user-123"
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/transactions");

@@ -1,0 +1,23 @@
+
+> personal-finance-tracker@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3200
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://127.0.0.1:3200
+- Network:       http://127.0.0.1:3200
+✓ Ready in 1062ms
+Creating turbopack project {
+  dir: 'C:\\Users\\ASUS\\Documents\\GitHub\\Personal-Finance-Tracker',
+  testMode: true
+}
+
+ GET /signup 200 in 879ms (next.js: 506ms, application-code: 374ms)
+ GET /signup 200 in 741ms (next.js: 206ms, application-code: 535ms)
+ GET /settings 500 in 360ms (next.js: 169ms, application-code: 191ms)
+ GET /signup 200 in 364ms (next.js: 15ms, application-code: 349ms)
+ POST /signup 500 in 769ms (next.js: 9ms, application-code: 760ms)
+  └─ ƒ signUpAction({}) in 6ms src/app/actions/auth.ts
+ POST /signup 500 in 1076ms (next.js: 21ms, application-code: 1055ms)
+  └─ ƒ signUpAction({}) in 1ms src/app/actions/auth.ts
+ GET /transactions/new 500 in 1120ms (next.js: 856ms, application-code: 264ms)
+ GET /reports?month=2026-05 500 in 1125ms (next.js: 720ms, application-code: 405ms)
