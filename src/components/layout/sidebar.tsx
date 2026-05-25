@@ -18,14 +18,15 @@ type SidebarProps = {
 export function Sidebar({ currentPath }: SidebarProps) {
   return (
     <aside className="hidden w-72 shrink-0 lg:block">
-      <div className="sticky top-6 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
+      <div className="glass-panel sticky top-6 overflow-hidden rounded-[2rem] p-6">
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent" />
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
           CashNest
         </p>
         <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
           Your money, in one calm place.
         </h2>
-        <nav aria-label="Primary" className="mt-8 space-y-2">
+        <nav aria-label="Primary" className="mt-8 space-y-2.5">
           {navigationItems.map((item) => {
             const isActive = isNavigationItemActive(currentPath, item.href);
 
@@ -34,10 +35,10 @@ export function Sidebar({ currentPath }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`block rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                className={`interactive-lift block rounded-2xl px-4 py-3 text-sm font-medium ${
                   isActive
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-stone-100 hover:text-slate-900"
+                    ? "bg-brand-50 text-brand-700 shadow-[inset_0_0_0_1px_rgba(15,138,120,0.16)]"
+                    : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                 }`}
               >
                 {item.label}
@@ -45,10 +46,10 @@ export function Sidebar({ currentPath }: SidebarProps) {
             );
           })}
         </nav>
-        <p className="mt-8 text-sm leading-6 text-slate-500">
+        <div className="mt-8 rounded-[1.5rem] bg-slate-900 px-4 py-4 text-sm leading-6 text-slate-200">
           Move between your core money views here on desktop, with matching
           navigation pinned on mobile.
-        </p>
+        </div>
       </div>
     </aside>
   );

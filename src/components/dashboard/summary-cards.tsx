@@ -86,12 +86,14 @@ export function SummaryCards({
 
   return (
     <section className="grid gap-4 md:grid-cols-3">
-      {items.map((item) => (
+      {items.map((item, index) => (
         <article
           key={item.label}
-          className={`overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${item.accentClassName} p-6 shadow-sm ring-1 ring-slate-100`}
+          className={`section-reveal overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${item.accentClassName} p-5 shadow-sm ring-1 ring-slate-100 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(15,23,42,0.08)] sm:p-6 ${index === 1 ? "section-reveal-delay-1" : ""} ${index === 2 ? "section-reveal-delay-2" : ""}`}
         >
-          <p className="text-sm font-medium text-slate-500">{item.label}</p>
+          <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
+            {item.label}
+          </p>
           <p className={`mt-4 text-3xl font-semibold ${item.toneClassName}`}>
             {formatCurrency(item.value)}
           </p>

@@ -29,7 +29,7 @@ function formatAmount(amount: number, type: TransactionType) {
 export function TransactionList({ items }: TransactionListProps) {
   if (items.length === 0) {
     return (
-      <section className="rounded-[1.75rem] bg-white p-8 shadow-sm ring-1 ring-slate-100">
+      <section className="glass-panel section-reveal section-reveal-delay-3 rounded-[1.75rem] p-8">
         <h2 className="text-xl font-semibold text-slate-900">
           No transactions match this view yet
         </h2>
@@ -42,7 +42,7 @@ export function TransactionList({ items }: TransactionListProps) {
   }
 
   return (
-    <section className="overflow-hidden rounded-[1.75rem] bg-white shadow-sm ring-1 ring-slate-100">
+    <section className="glass-panel section-reveal section-reveal-delay-3 overflow-hidden rounded-[1.75rem]">
       <header className="flex flex-col gap-2 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Ledger</h2>
@@ -53,7 +53,7 @@ export function TransactionList({ items }: TransactionListProps) {
         </div>
         <Link
           href="/transactions/new"
-          className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+          className="interactive-lift inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
         >
           Add another
         </Link>
@@ -63,7 +63,7 @@ export function TransactionList({ items }: TransactionListProps) {
         {items.map((item) => (
           <li
             key={item.id}
-            className="flex flex-col gap-4 px-6 py-5 lg:flex-row lg:items-start lg:justify-between"
+            className="flex flex-col gap-4 px-5 py-5 transition-colors duration-200 hover:bg-white/80 sm:px-6 lg:flex-row lg:items-start lg:justify-between"
           >
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-3">
@@ -95,14 +95,14 @@ export function TransactionList({ items }: TransactionListProps) {
               <div className="flex flex-wrap gap-2">
                 <Link
                   href={`/transactions/${item.id}/edit`}
-                  className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  className="interactive-lift inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
                 >
                   Edit
                 </Link>
                 <form action={deleteTransactionAction.bind(null, item.id)}>
                   <button
                     type="submit"
-                    className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-rose-200 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                    className="interactive-lift inline-flex min-h-10 items-center justify-center rounded-2xl border border-rose-200 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
                   >
                     Delete
                   </button>

@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError, z } from "zod";
-import { requireUserId } from "@/lib/auth/session";
+import { getSessionAccessToken, requireUserId } from "@/lib/auth/session";
 import type { CategoryRecord, TransactionRecord, TransactionType, UUID } from "@/lib/db/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import {
@@ -127,7 +127,10 @@ async function validateTransactionCategory(
   categoryId: string,
   expectedType: TransactionType
 ) {
-  const supabase = createServerSupabaseClient();
+  const accessToken = await getSessionAccessToken();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { data, error } = await supabase
     .from("categories")
     .select("id, type")
@@ -152,7 +155,10 @@ async function ensureOwnedTransaction(userId: string, id: string) {
     throw new Error(transactionNotFoundMessage);
   }
 
-  const supabase = createServerSupabaseClient();
+  const accessToken = await getSessionAccessToken();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { data, error } = await supabase
     .from("transactions")
     .select("id")
@@ -186,6 +192,7 @@ export async function createTransactionAction(formData: FormData): Promise<void>
   "use server";
 
   const userId = await requireUserId();
+  const accessToken = await getSessionAccessToken();
 
   let payload: TransactionInput;
 
@@ -219,7 +226,9 @@ export async function createTransactionAction(formData: FormData): Promise<void>
     );
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { error } = await supabase
     .from("transactions")
     .insert(toDatabasePayload(userId, payload));
@@ -249,6 +258,7 @@ export async function updateTransactionAction(
   "use server";
 
   const userId = await requireUserId();
+  const accessToken = await getSessionAccessToken();
   const editPath = `/transactions/${id}/edit`;
 
   let payload: TransactionInput;
@@ -296,7 +306,9 @@ export async function updateTransactionAction(
     );
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { error } = await supabase
     .from("transactions")
     .update(toDatabaseUpdate(payload))
@@ -328,6 +340,7 @@ export async function deleteTransactionAction(id: string): Promise<void> {
   "use server";
 
   const userId = await requireUserId();
+  const accessToken = await getSessionAccessToken();
   let transactionId: string;
 
   try {
@@ -342,7 +355,9 @@ export async function deleteTransactionAction(id: string): Promise<void> {
     );
   }
 
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { error } = await supabase
     .from("transactions")
     .delete()
@@ -372,7 +387,10 @@ export async function deleteTransactionAction(id: string): Promise<void> {
 export async function listTransactionCategories(
   userId: string
 ): Promise<TransactionCategoryOption[]> {
-  const supabase = createServerSupabaseClient();
+  const accessToken = await getSessionAccessToken();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { data, error } = await supabase
     .from("categories")
     .select("id, name, type, color, icon, is_default")
@@ -401,7 +419,10 @@ export async function listTransactionCategories(
 export async function listTransactions(
   userId: string
 ): Promise<TransactionListItem[]> {
-  const supabase = createServerSupabaseClient();
+  const accessToken = await getSessionAccessToken();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { data, error } = await supabase
     .from("transactions")
     .select(
@@ -431,7 +452,10 @@ export async function getTransactionForEdit(
   userId: string,
   id: UUID
 ): Promise<TransactionFormValues | null> {
-  const supabase = createServerSupabaseClient();
+  const accessToken = await getSessionAccessToken();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { data, error } = await supabase
     .from("transactions")
     .select("id, title, amount, type, category_id, transaction_date, notes")

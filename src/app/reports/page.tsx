@@ -59,7 +59,7 @@ function MetricCard({
 }) {
   return (
     <article
-      className={`overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${accentClassName} p-6 shadow-sm ring-1 ring-slate-100`}
+      className={`section-reveal overflow-hidden rounded-[1.75rem] bg-gradient-to-br ${accentClassName} p-5 shadow-sm ring-1 ring-slate-100 transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(15,23,42,0.08)] sm:p-6`}
     >
       <p className="text-sm font-medium text-slate-500">{label}</p>
       <p className={`mt-4 text-3xl font-semibold ${valueClassName}`}>
@@ -84,7 +84,7 @@ function ComparisonCard({
         : "text-slate-700";
 
   return (
-    <article className="rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4">
+    <article className="rounded-[1.5rem] border border-slate-200 bg-slate-50/90 px-4 py-4">
       <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
         {label}
       </p>
@@ -116,7 +116,7 @@ function ReportsContent({
       id="monthly-report-content"
       className="space-y-6 print:space-y-4"
     >
-      <section className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100 print:rounded-none print:border print:border-slate-200 print:p-4 print:shadow-none print:ring-0">
+      <section className="glass-panel section-reveal rounded-[1.75rem] p-5 print:rounded-none print:border print:border-slate-200 print:p-4 print:shadow-none print:ring-0 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-900">
@@ -135,12 +135,12 @@ function ReportsContent({
                 type="month"
                 defaultValue={selectedMonthKey}
                 max={currentMonthKey}
-                className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               />
             </label>
             <button
               type="submit"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-700"
+              className="interactive-lift inline-flex min-h-12 items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:bg-slate-700"
             >
               View month
             </button>
@@ -150,20 +150,20 @@ function ReportsContent({
         <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
           <Link
             href={`/reports?month=${previousMonthKey}`}
-            className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            className="interactive-lift inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
           >
             Previous month
           </Link>
           <Link
             href={`/reports?month=${currentMonthKey}`}
-            className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+            className="interactive-lift inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
           >
             Current month
           </Link>
           {canGoForward ? (
             <Link
               href={`/reports?month=${nextMonthKey}`}
-              className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              className="interactive-lift inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
             >
               Next month
             </Link>
@@ -173,7 +173,7 @@ function ReportsContent({
         <div className="mt-5 flex flex-wrap items-center gap-3 print:hidden">
           <Link
             href={exportHref}
-            className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-brand-700 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90"
+            className="interactive-lift inline-flex min-h-11 items-center justify-center rounded-2xl bg-brand-700 px-4 py-3 text-sm font-medium text-white hover:opacity-90"
           >
             Export CSV
           </Link>
@@ -211,7 +211,7 @@ function ReportsContent({
         />
       </section>
 
-      <section className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100 print:rounded-none print:border print:border-slate-200 print:p-4 print:shadow-none print:ring-0">
+      <section className="glass-panel section-reveal section-reveal-delay-1 rounded-[1.75rem] p-5 print:rounded-none print:border print:border-slate-200 print:p-4 print:shadow-none print:ring-0 sm:p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-900">

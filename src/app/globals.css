@@ -2,6 +2,124 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    color-scheme: light;
+    --background: #f4f1ea;
+    --background-strong: #ebe7dd;
+    --surface: rgba(255, 255, 255, 0.84);
+    --surface-strong: rgba(255, 255, 255, 0.96);
+    --surface-border: rgba(148, 163, 184, 0.16);
+    --text-primary: #10212a;
+    --text-muted: #52616f;
+    --brand: #0f8a78;
+    --brand-strong: #0b6b60;
+    --brand-soft: rgba(15, 138, 120, 0.12);
+    --shadow-soft: 0 20px 45px rgba(15, 23, 42, 0.06);
+    --shadow-lift: 0 26px 60px rgba(15, 23, 42, 0.1);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-sans), "Segoe UI Variable", "Aptos", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(15, 138, 120, 0.14), transparent 32%),
+      radial-gradient(circle at top right, rgba(14, 116, 144, 0.12), transparent 26%),
+      linear-gradient(180deg, var(--background) 0%, #f9f7f2 100%);
+    color: var(--text-primary);
+  }
+
+  * {
+    border-color: var(--surface-border);
+  }
+
+  ::selection {
+    background: rgba(15, 138, 120, 0.18);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: linear-gradient(
+      180deg,
+      var(--surface-strong) 0%,
+      var(--surface) 100%
+    );
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(18px);
+  }
+
+  .section-reveal {
+    animation: sectionReveal 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .section-reveal-delay-1 {
+    animation-delay: 80ms;
+  }
+
+  .section-reveal-delay-2 {
+    animation-delay: 160ms;
+  }
+
+  .section-reveal-delay-3 {
+    animation-delay: 240ms;
+  }
+
+  .interactive-lift {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease,
+      color 220ms ease;
+  }
+
+  .interactive-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .mesh-header {
+    background:
+      radial-gradient(circle at top left, rgba(15, 138, 120, 0.2), transparent 36%),
+      radial-gradient(circle at bottom right, rgba(14, 116, 144, 0.14), transparent 28%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 250, 252, 0.88) 100%);
+  }
+}
+
+@keyframes sectionReveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .section-reveal,
+  .section-reveal-delay-1,
+  .section-reveal-delay-2,
+  .section-reveal-delay-3,
+  .interactive-lift {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 body {
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), "Segoe UI Variable", "Aptos", sans-serif;
 }

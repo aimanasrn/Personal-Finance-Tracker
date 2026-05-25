@@ -5,6 +5,7 @@ const redirectMock = vi.fn((location: string) => {
 });
 const revalidatePathMock = vi.fn();
 const requireUserIdMock = vi.fn();
+const getSessionAccessTokenMock = vi.fn();
 const fromMock = vi.fn();
 
 function createCategoryQueryMock(result: { data: unknown; error: unknown }) {
@@ -36,13 +37,16 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/lib/auth/session", () => ({
+  getSessionAccessToken: getSessionAccessTokenMock,
   requireUserId: requireUserIdMock
 }));
 
+const createServerSupabaseClientMock = vi.fn(() => ({
+  from: fromMock
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(() => ({
-    from: fromMock
-  }))
+  createServerSupabaseClient: createServerSupabaseClientMock
 }));
 
 describe("transaction actions", () => {
@@ -50,8 +54,64 @@ describe("transaction actions", () => {
     redirectMock.mockClear();
     revalidatePathMock.mockClear();
     requireUserIdMock.mockReset();
+    getSessionAccessTokenMock.mockReset();
+    createServerSupabaseClientMock.mockClear();
     fromMock.mockReset();
     requireUserIdMock.mockResolvedValue("user-123");
+    getSessionAccessTokenMock.mockResolvedValue("access-token-123");
+  });
+
+  it("loads transaction categories with the signed-in access token so default categories remain visible under RLS", async () => {
+    const orderNameMock = vi.fn().mockResolvedValue({
+      data: [
+        {
+          id: "550e8400-e29b-41d4-a716-446655440001",
+          name: "Transport",
+          type: "expense",
+          color: "#0284c7",
+          icon: "car",
+          is_default: true
+        }
+      ],
+      error: null
+    });
+    const orderDefaultMock = vi.fn().mockReturnValue({
+      order: orderNameMock
+    });
+    const orMock = vi.fn().mockReturnValue({
+      order: orderDefaultMock
+    });
+    const selectMock = vi.fn().mockReturnValue({
+      or: orMock
+    });
+
+    fromMock.mockImplementation((table: string) => {
+      if (table === "categories") {
+        return {
+          select: selectMock
+        };
+      }
+
+      throw new Error(`Unexpected table: ${table}`);
+    });
+
+    const { listTransactionCategories } = await import("./transactions");
+    const categories = await listTransactionCategories("user-123");
+
+    expect(getSessionAccessTokenMock).toHaveBeenCalledTimes(1);
+    expect(createServerSupabaseClientMock).toHaveBeenCalledWith({
+      accessToken: "access-token-123"
+    });
+    expect(categories).toEqual([
+      {
+        id: "550e8400-e29b-41d4-a716-446655440001",
+        name: "Transport",
+        type: "expense",
+        color: "#0284c7",
+        icon: "car",
+        isDefault: true
+      }
+    ]);
   });
 
   it("normalizes form data for creation", async () => {
@@ -114,6 +174,9 @@ describe("transaction actions", () => {
     );
 
     expect(requireUserIdMock).toHaveBeenCalledTimes(1);
+    expect(createServerSupabaseClientMock).toHaveBeenCalledWith({
+      accessToken: "access-token-123"
+    });
     expect(fromMock).toHaveBeenCalledWith("categories");
     expect(fromMock).toHaveBeenCalledWith("transactions");
     expect(categoryQuery.eqMock).toHaveBeenCalledWith(
@@ -250,6 +313,9 @@ describe("transaction actions", () => {
       "REDIRECT:/transactions?message=Transaction+updated."
     );
 
+    expect(createServerSupabaseClientMock).toHaveBeenCalledWith({
+      accessToken: "access-token-123"
+    });
     expect(updateMock).toHaveBeenCalledWith({
       title: "Grab ride home",
       amount: 19.4,
@@ -441,6 +507,9 @@ describe("transaction actions", () => {
       "REDIRECT:/transactions?message=Transaction+deleted."
     );
 
+    expect(createServerSupabaseClientMock).toHaveBeenCalledWith({
+      accessToken: "access-token-123"
+    });
     expect(deleteMock).toHaveBeenCalledTimes(1);
     expect(matchMock).toHaveBeenCalledWith({
       id: transactionId,

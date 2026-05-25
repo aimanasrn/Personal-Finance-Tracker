@@ -98,7 +98,7 @@ export default async function TransactionsPage({
       title="Transactions"
       description="Review the full ledger, filter what matters, and keep the everyday bookkeeping flow close at hand."
     >
-      <section className="flex flex-col gap-4 rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center sm:justify-between">
+      <section className="glass-panel section-reveal flex flex-col gap-4 rounded-[1.75rem] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">
             Everyday money movement, all in one place
@@ -110,7 +110,7 @@ export default async function TransactionsPage({
         </div>
         <Link
           href="/transactions/new"
-          className="inline-flex items-center justify-center rounded-2xl bg-brand-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-brand-500"
+          className="interactive-lift inline-flex items-center justify-center rounded-2xl bg-brand-700 px-5 py-3 text-sm font-medium text-white hover:bg-brand-500"
         >
           Add transaction
         </Link>
@@ -128,15 +128,15 @@ export default async function TransactionsPage({
         </p>
       ) : null}
 
-      <section className="mt-6 rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
-        <form className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_220px_220px_180px_180px_auto]">
+      <section className="glass-panel section-reveal section-reveal-delay-1 mt-6 rounded-[1.75rem] p-5 sm:p-6">
+        <form className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.2fr)_220px_220px_180px_180px_auto]">
           <label className="grid gap-2 text-sm font-medium text-slate-700">
             Search
             <input
               name="q"
               defaultValue={query}
               placeholder="Search title, category, or notes"
-              className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </label>
           <label className="grid gap-2 text-sm font-medium text-slate-700">
@@ -144,7 +144,7 @@ export default async function TransactionsPage({
             <select
               name="categoryId"
               defaultValue={categoryFilter}
-              className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             >
               <option value="">All categories</option>
               {categories.map((category) => (
@@ -159,7 +159,7 @@ export default async function TransactionsPage({
             <select
               name="type"
               defaultValue={typeFilter}
-              className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             >
               <option value="all">All transactions</option>
               <option value="expense">Expenses</option>
@@ -172,7 +172,7 @@ export default async function TransactionsPage({
               name="from"
               type="date"
               defaultValue={fromDateFilter}
-              className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </label>
           <label className="grid gap-2 text-sm font-medium text-slate-700">
@@ -181,19 +181,19 @@ export default async function TransactionsPage({
               name="to"
               type="date"
               defaultValue={toDateFilter}
-              className="rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             />
           </label>
-          <div className="flex items-end gap-3">
+          <div className="flex flex-wrap items-end gap-3 md:col-span-2 xl:col-span-1">
             <button
               type="submit"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-700"
+              className="interactive-lift inline-flex min-h-12 items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white hover:bg-slate-700"
             >
               Apply filters
             </button>
             <Link
               href="/transactions"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+              className="interactive-lift inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-700"
             >
               Reset
             </Link>

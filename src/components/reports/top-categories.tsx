@@ -12,7 +12,7 @@ const currencyFormatter = new Intl.NumberFormat("en-MY", {
 
 export function TopCategories({ items, monthLabel }: TopCategoriesProps) {
   return (
-    <article className="rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
+    <article className="glass-panel section-reveal section-reveal-delay-3 rounded-[1.75rem] p-5 sm:p-6">
       <h2 className="text-xl font-semibold text-slate-900">
         Top spending categories
       </h2>

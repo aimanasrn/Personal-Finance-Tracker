@@ -45,7 +45,7 @@ export function MonthlyChart({
   };
 
   return (
-    <article className="overflow-hidden rounded-[1.75rem] bg-white p-6 shadow-sm ring-1 ring-slate-100">
+    <article className="glass-panel section-reveal section-reveal-delay-2 overflow-hidden rounded-[1.75rem] p-5 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">
@@ -67,7 +67,7 @@ export function MonthlyChart({
         </div>
       </div>
 
-      <div className="mt-6 h-72">
+      <div className="mt-6 h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} barGap={24}>
             <CartesianGrid vertical={false} stroke="#e2e8f0" />

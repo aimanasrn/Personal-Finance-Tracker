@@ -22,7 +22,7 @@ function formatAmount(amount: number, type: TransactionType) {
 
 export function RecentTransactions({ items }: RecentTransactionsProps) {
   return (
-    <section className="overflow-hidden rounded-[1.75rem] bg-white shadow-sm ring-1 ring-slate-100">
+    <section className="glass-panel section-reveal section-reveal-delay-2 overflow-hidden rounded-[1.75rem]">
       <header className="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">
@@ -34,7 +34,7 @@ export function RecentTransactions({ items }: RecentTransactionsProps) {
         </div>
         <Link
           href="/transactions"
-          className="inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+          className="interactive-lift inline-flex items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
         >
           Open ledger
         </Link>
@@ -51,7 +51,7 @@ export function RecentTransactions({ items }: RecentTransactionsProps) {
           </p>
           <Link
             href="/transactions/new"
-            className="mt-5 inline-flex items-center justify-center rounded-2xl bg-brand-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-brand-500"
+            className="interactive-lift mt-5 inline-flex items-center justify-center rounded-2xl bg-brand-700 px-5 py-3 text-sm font-medium text-white hover:bg-brand-500"
           >
             Add transaction
           </Link>
@@ -61,7 +61,7 @@ export function RecentTransactions({ items }: RecentTransactionsProps) {
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex flex-col gap-3 px-6 py-5 sm:flex-row sm:items-start sm:justify-between"
+              className="flex flex-col gap-3 px-6 py-5 transition-colors duration-200 hover:bg-white/75 sm:flex-row sm:items-start sm:justify-between"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-3">
@@ -94,7 +94,7 @@ export function RecentTransactions({ items }: RecentTransactionsProps) {
                 </p>
                 <Link
                   href={`/transactions/${item.id}/edit`}
-                  className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  className="interactive-lift inline-flex min-h-10 items-center justify-center rounded-2xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
                 >
                   Edit
                 </Link>

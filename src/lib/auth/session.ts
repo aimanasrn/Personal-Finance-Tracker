@@ -47,6 +47,14 @@ function readRefreshTokenCookie(rawValue: string) {
   return readTokenCookie(rawValue, "refresh_token");
 }
 
+export async function getSessionAccessToken() {
+  const cookieStore = await cookies();
+
+  return readAccessTokenCookie(
+    cookieStore.get(ACCESS_TOKEN_COOKIE)?.value ?? ""
+  );
+}
+
 export async function persistSession(session: Session | null) {
   const cookieStore = await cookies();
 
@@ -80,9 +88,7 @@ export async function clearSession() {
 
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
-  const accessToken = readAccessTokenCookie(
-    cookieStore.get(ACCESS_TOKEN_COOKIE)?.value ?? ""
-  );
+  const accessToken = await getSessionAccessToken();
   const refreshToken = readRefreshTokenCookie(
     cookieStore.get(REFRESH_TOKEN_COOKIE)?.value ?? ""
   );
