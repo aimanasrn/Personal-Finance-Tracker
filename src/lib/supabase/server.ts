@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { normalizeSupabaseUrl } from "./url";
 
 type ServerSupabaseOptions = {
   accessToken?: string;
@@ -11,7 +12,7 @@ function getSupabaseUrl() {
     throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
   }
 
-  return value;
+  return normalizeSupabaseUrl(value);
 }
 
 function getServerSupabaseKey() {
