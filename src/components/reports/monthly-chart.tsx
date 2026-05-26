@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -28,10 +29,15 @@ export function MonthlyChart({
   expenses,
   monthLabel
 }: MonthlyChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const data = [
     { name: "Income", value: income, fill: "#1f9d7a" },
     { name: "Expenses", value: expenses, fill: "#f97316" }
   ];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const formatValue = (
     value: number | string | readonly (number | string)[] | undefined
   ) => {
@@ -68,34 +74,38 @@ export function MonthlyChart({
       </div>
 
       <div className="mt-6 h-64 min-w-0 sm:h-72">
-        <ResponsiveContainer width="100%" height="100%" minWidth={260}>
-          <BarChart data={data} barGap={24}>
-            <CartesianGrid vertical={false} stroke="#e2e8f0" />
-            <XAxis
-              axisLine={false}
-              dataKey="name"
-              tickLine={false}
-              tick={{ fill: "#475569", fontSize: 12 }}
-            />
-            <YAxis
-              axisLine={false}
-              tickFormatter={(value: number) => currencyFormatter.format(value)}
-              tickLine={false}
-              tick={{ fill: "#94a3b8", fontSize: 12 }}
-              width={90}
-            />
-            <Tooltip
-              cursor={{ fill: "#f8fafc" }}
-              formatter={(value) => formatValue(value)}
-              labelStyle={{ color: "#0f172a", fontWeight: 600 }}
-            />
-            <Bar dataKey="value" radius={[18, 18, 0, 0]}>
-              {data.map((entry) => (
-                <Cell key={entry.name} fill={entry.fill} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        {isMounted ? (
+          <ResponsiveContainer width="100%" height="100%" minWidth={260}>
+            <BarChart data={data} barGap={24}>
+              <CartesianGrid vertical={false} stroke="#e2e8f0" />
+              <XAxis
+                axisLine={false}
+                dataKey="name"
+                tickLine={false}
+                tick={{ fill: "#475569", fontSize: 12 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickFormatter={(value: number) => currencyFormatter.format(value)}
+                tickLine={false}
+                tick={{ fill: "#94a3b8", fontSize: 12 }}
+                width={90}
+              />
+              <Tooltip
+                cursor={{ fill: "#f8fafc" }}
+                formatter={(value) => formatValue(value)}
+                labelStyle={{ color: "#0f172a", fontWeight: 600 }}
+              />
+              <Bar dataKey="value" radius={[18, 18, 0, 0]}>
+                {data.map((entry) => (
+                  <Cell key={entry.name} fill={entry.fill} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full rounded-[1.5rem] bg-slate-50/80" />
+        )}
       </div>
     </article>
   );

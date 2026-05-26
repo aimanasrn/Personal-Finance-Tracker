@@ -4,8 +4,12 @@ const redirectMock = vi.fn((location: string) => {
   throw new Error(`REDIRECT:${location}`);
 });
 const requireUserIdMock = vi.fn();
+const getSessionAccessTokenMock = vi.fn();
 const fromMock = vi.fn();
 const revalidatePathMock = vi.fn();
+const createServerSupabaseClientMock = vi.fn(() => ({
+  from: fromMock
+}));
 
 vi.mock("next/navigation", () => ({
   redirect: redirectMock
@@ -16,13 +20,12 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/lib/auth/session", () => ({
+  getSessionAccessToken: getSessionAccessTokenMock,
   requireUserId: requireUserIdMock
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(() => ({
-    from: fromMock
-  }))
+  createServerSupabaseClient: createServerSupabaseClientMock
 }));
 
 describe("profile actions", () => {
@@ -31,7 +34,9 @@ describe("profile actions", () => {
     requireUserIdMock.mockReset();
     fromMock.mockReset();
     revalidatePathMock.mockClear();
+    createServerSupabaseClientMock.mockClear();
     requireUserIdMock.mockResolvedValue("user-123");
+    getSessionAccessTokenMock.mockResolvedValue("token-123");
   });
 
   it("updates profile preferences for the authenticated user", async () => {
@@ -64,6 +69,9 @@ describe("profile actions", () => {
         onConflict: "user_id"
       }
     );
+    expect(createServerSupabaseClientMock).toHaveBeenCalledWith({
+      accessToken: "token-123"
+    });
     expect(revalidatePathMock).toHaveBeenCalledWith("/settings");
   });
 

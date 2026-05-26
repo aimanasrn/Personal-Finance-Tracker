@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
-import { requireUserId } from "@/lib/auth/session";
+import { getSessionAccessToken, requireUserId } from "@/lib/auth/session";
 import { ProfileRecord } from "@/lib/db/types";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { logServerError } from "../../lib/monitoring/server-log";
@@ -28,7 +28,10 @@ function getProfileErrorMessage(error: unknown) {
 }
 
 export async function getProfile(userId: string) {
-  const supabase = createServerSupabaseClient();
+  const accessToken = await getSessionAccessToken();
+  const supabase = createServerSupabaseClient(
+    accessToken ? { accessToken } : undefined
+  );
   const { data, error } = await supabase
     .from("profiles")
     .select("display_name, preferred_currency")
@@ -47,6 +50,7 @@ export async function getProfile(userId: string) {
 
 export async function updateProfileAction(formData: FormData): Promise<void> {
   const userId = await requireUserId();
+  const accessToken = await getSessionAccessToken();
 
   let payload: ReturnType<typeof profileSchema.parse>;
 
@@ -62,7 +66,9 @@ export async function updateProfileAction(formData: FormData): Promise<void> {
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseClient(
+      accessToken ? { accessToken } : undefined
+    );
     const { error } = await supabase.from("profiles").upsert(
       {
         user_id: userId,
