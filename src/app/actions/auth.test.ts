@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const clearSessionMock = vi.fn();
+const createServerSupabaseClientMock = vi.fn();
 const persistSessionMock = vi.fn();
 const signInWithPasswordMock = vi.fn();
 const signOutMock = vi.fn();
@@ -23,22 +24,32 @@ vi.mock("@/lib/validation/auth", async () => {
 });
 
 vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(() => ({
-    auth: {
-      signInWithPassword: signInWithPasswordMock,
-      signOut: signOutMock,
-      signUp: signUpMock
-    }
-  }))
+  createServerSupabaseClient: createServerSupabaseClientMock
+}));
+
+createServerSupabaseClientMock.mockImplementation(() => ({
+  auth: {
+    signInWithPassword: signInWithPasswordMock,
+    signOut: signOutMock,
+    signUp: signUpMock
+  }
 }));
 
 describe("auth actions", () => {
   beforeEach(() => {
     clearSessionMock.mockReset();
+    createServerSupabaseClientMock.mockReset();
     persistSessionMock.mockReset();
     signInWithPasswordMock.mockReset();
     signOutMock.mockReset();
     signUpMock.mockReset();
+    createServerSupabaseClientMock.mockImplementation(() => ({
+      auth: {
+        signInWithPassword: signInWithPasswordMock,
+        signOut: signOutMock,
+        signUp: signUpMock
+      }
+    }));
   });
 
   it("redirects malformed signup form data back to signup instead of throwing a server error", async () => {
@@ -134,5 +145,21 @@ describe("auth actions", () => {
       "REDIRECT:/login?error=Too+many+login+attempts.+Please+wait+a+minute+before+trying+again."
     );
     expect(signInWithPasswordMock).toHaveBeenCalledTimes(5);
+  });
+
+  it("redirects login attempts with a friendly message when infrastructure setup throws unexpectedly", async () => {
+    createServerSupabaseClientMock.mockImplementation(() => {
+      throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured.");
+    });
+
+    const formData = new FormData();
+    formData.set("email", "person@example.com");
+    formData.set("password", "cashnest-pass-123");
+
+    const { loginAction } = await import("./auth");
+
+    await expect(loginAction(formData)).rejects.toThrow(
+      "REDIRECT:/login?error=We+couldn%27t+complete+that+authentication+step+right+now.+Please+try+again."
+    );
   });
 });

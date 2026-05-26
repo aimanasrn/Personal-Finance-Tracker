@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { CopyrightFooter } from "@/components/layout/copyright-footer";
 
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-[92rem] items-center px-4 py-8 sm:px-6 lg:px-8">
-      <section className="grid w-full gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-        <div className="section-reveal glass-panel mesh-header overflow-hidden rounded-[2.25rem] px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+      <div className="w-full">
+        <section className="grid w-full gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div className="section-reveal glass-panel mesh-header overflow-hidden rounded-[2.25rem] px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-700">
             Personal finance tracker
           </div>
@@ -33,10 +35,10 @@ export default function HomePage() {
               Log in
             </Link>
           </div>
-        </div>
+          </div>
 
-        <div className="section-reveal section-reveal-delay-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          <article className="glass-panel interactive-lift rounded-[1.9rem] p-6">
+          <div className="section-reveal section-reveal-delay-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            <article className="glass-panel interactive-lift rounded-[1.9rem] p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Fast capture
             </p>
@@ -47,9 +49,9 @@ export default function HomePage() {
               Beginner-friendly forms, category suggestions, and mobile-ready
               flows help you log money without friction.
             </p>
-          </article>
+            </article>
 
-          <article className="glass-panel interactive-lift rounded-[1.9rem] p-6">
+            <article className="glass-panel interactive-lift rounded-[1.9rem] p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Clear review
             </p>
@@ -60,9 +62,12 @@ export default function HomePage() {
               Compare inflow and outflow, export a CSV, and surface the spending
               categories that deserve attention.
             </p>
-          </article>
-        </div>
-      </section>
+            </article>
+          </div>
+        </section>
+
+        <CopyrightFooter />
+      </div>
     </main>
   );
 }

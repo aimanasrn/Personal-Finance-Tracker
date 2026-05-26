@@ -124,17 +124,31 @@ export async function signUpAction(formData: FormData): Promise<void> {
     );
   }
 
-  const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase.auth.signUp(normalizedPayload);
+  let data:
+    | Awaited<ReturnType<ReturnType<typeof createServerSupabaseClient>["auth"]["signUp"]>>["data"]
+    | null = null;
 
-  if (error) {
-    redirect(buildAuthRedirect("/signup", "error", getAuthErrorMessage(error)));
+  try {
+    const supabase = createServerSupabaseClient();
+    const result = await supabase.auth.signUp(normalizedPayload);
+
+    if (result.error) {
+      redirect(
+        buildAuthRedirect("/signup", "error", getAuthErrorMessage(result.error))
+      );
+    }
+
+    data = result.data;
+  } catch (error) {
+    redirect(
+      buildAuthRedirect("/signup", "error", getAuthErrorMessage(error))
+    );
   }
 
-  await persistSession(data.session);
+  await persistSession(data?.session ?? null);
   clearAuthAttempts("signup", normalizedPayload.email);
 
-  if (data.session) {
+  if (data?.session) {
     redirect("/dashboard");
   }
 
@@ -172,16 +186,30 @@ export async function loginAction(formData: FormData): Promise<void> {
     );
   }
 
-  const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase.auth.signInWithPassword(
-    normalizedPayload
-  );
+  let data:
+    | Awaited<
+        ReturnType<
+          ReturnType<typeof createServerSupabaseClient>["auth"]["signInWithPassword"]
+        >
+      >["data"]
+    | null = null;
 
-  if (error) {
+  try {
+    const supabase = createServerSupabaseClient();
+    const result = await supabase.auth.signInWithPassword(normalizedPayload);
+
+    if (result.error) {
+      redirect(
+        buildAuthRedirect("/login", "error", getAuthErrorMessage(result.error))
+      );
+    }
+
+    data = result.data;
+  } catch (error) {
     redirect(buildAuthRedirect("/login", "error", getAuthErrorMessage(error)));
   }
 
-  if (!data.session) {
+  if (!data?.session) {
     await clearSession();
     redirect(
       buildAuthRedirect(

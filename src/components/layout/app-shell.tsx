@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { CopyrightFooter } from "@/components/layout/copyright-footer";
 import { requireUserId } from "../../lib/auth/session";
 import { MobileNav } from "./mobile-nav";
 import { Sidebar } from "./sidebar";
@@ -51,6 +52,7 @@ export function AppShell({
             </div>
           </header>
           <main className="mt-5 flex-1 sm:mt-6">{children}</main>
+          <CopyrightFooter compact />
         </div>
       </div>
       <MobileNav currentPath={currentPath} />

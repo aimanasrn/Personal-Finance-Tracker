@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
+import { CopyrightFooter } from "@/components/layout/copyright-footer";
 
 type LoginPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -21,8 +22,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-[92rem] items-center px-4 py-8 sm:px-6 lg:px-8">
-      <section className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div className="section-reveal max-w-xl">
+      <div className="w-full">
+        <section className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <div className="section-reveal max-w-xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
             CashNest
           </p>
@@ -51,13 +53,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               </p>
             </div>
           </div>
-        </div>
+          </div>
 
-        <div className="section-reveal section-reveal-delay-1">
-          <form
-            action={loginAction}
-            className="glass-panel mx-auto max-w-md space-y-4 rounded-[2rem] p-6 sm:p-7"
-          >
+          <div className="section-reveal section-reveal-delay-1">
+            <form
+              action={loginAction}
+              className="glass-panel mx-auto max-w-md space-y-4 rounded-[2rem] p-6 sm:p-7"
+            >
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">
                 Welcome back
@@ -113,9 +115,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 Create an account
               </Link>
             </p>
-          </form>
-        </div>
-      </section>
+            </form>
+          </div>
+        </section>
+
+        <CopyrightFooter />
+      </div>
     </main>
   );
 }
