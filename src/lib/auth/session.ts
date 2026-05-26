@@ -110,7 +110,6 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 
   if (!refreshToken) {
-    await clearSession();
     return null;
   }
 
@@ -119,11 +118,9 @@ export async function getCurrentUser(): Promise<User | null> {
   });
 
   if (error || !data.session || !data.user) {
-    await clearSession();
     return null;
   }
 
-  await persistSession(data.session);
   return data.user;
 }
 

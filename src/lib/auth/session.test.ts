@@ -31,7 +31,7 @@ describe("getCurrentUser", () => {
     refreshSessionMock.mockReset();
   });
 
-  it("refreshes an expired access token by using the stored refresh token", async () => {
+  it("can refresh an expired access token during a render without mutating cookies", async () => {
     cookieStore.get.mockImplementation((name: string) => {
       if (name === "cashnest-access-token") {
         return { value: "expired-access-token" };
@@ -68,7 +68,8 @@ describe("getCurrentUser", () => {
     expect(refreshSessionMock).toHaveBeenCalledWith({
       refresh_token: "refresh-token"
     });
-    expect(cookieStore.set).toHaveBeenCalledTimes(2);
+    expect(cookieStore.set).not.toHaveBeenCalled();
+    expect(cookieStore.delete).not.toHaveBeenCalled();
     expect(user).toEqual({ id: "user-123" });
   });
 });
