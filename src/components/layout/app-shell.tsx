@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { logoutAction } from "@/app/actions/auth";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { BrandLogo } from "@/components/branding/brand-logo";
 import { CopyrightFooter } from "@/components/layout/copyright-footer";
 import { requireUserId } from "../../lib/auth/session";
 import { MobileNav } from "./mobile-nav";
@@ -32,9 +33,7 @@ export function AppShell({
             <div className="mesh-header px-5 py-6 sm:px-7 sm:py-7 lg:px-8">
               <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-                    CashNest
-                  </p>
+                  <BrandLogo href="/dashboard" size="sm" priority />
                   <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl lg:text-[2.8rem]">
                     {title}
                   </h1>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/branding/brand-logo";
 
 export const navigationItems = [
   { href: "/dashboard", label: "Dashboard" },
@@ -20,10 +21,8 @@ export function Sidebar({ currentPath }: SidebarProps) {
     <aside className="hidden w-72 shrink-0 lg:block">
       <div className="glass-panel sticky top-6 overflow-hidden rounded-[2rem] p-6">
         <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-brand-200 to-transparent" />
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-          CashNest
-        </p>
-        <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">
+        <BrandLogo href="/" size="sm" />
+        <h2 className="mt-5 text-2xl font-semibold tracking-tight text-slate-900">
           Your money, in one calm place.
         </h2>
         <nav aria-label="Primary" className="mt-8 space-y-2.5">

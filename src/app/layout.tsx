@@ -10,7 +10,10 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "CashNest",
-  description: "A calm personal finance tracker for everyday money management."
+  description: "A calm personal finance tracker for everyday money management.",
+  icons: {
+    icon: "/branding/logo.png"
+  }
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

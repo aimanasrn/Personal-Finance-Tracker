@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { loginAction } from "@/app/actions/auth";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
+import { BrandLogo } from "@/components/branding/brand-logo";
 import { CopyrightFooter } from "@/components/layout/copyright-footer";
 
 type LoginPageProps = {
@@ -25,9 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="w-full">
         <section className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="section-reveal max-w-xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-            CashNest
-          </p>
+          <BrandLogo href="/" size="md" priority />
           <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
             Log back in and keep your budget in motion.
           </h1>

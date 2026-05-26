@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/branding/brand-logo";
 import { CopyrightFooter } from "@/components/layout/copyright-footer";
 
 export default function HomePage() {
@@ -10,9 +11,9 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-700">
             Personal finance tracker
           </div>
-          <p className="mt-6 text-sm font-semibold uppercase tracking-[0.2em] text-brand-700">
-            CashNest
-          </p>
+          <div className="mt-6">
+            <BrandLogo href="/" size="md" priority />
+          </div>
           <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
             Track money in and out without living inside a spreadsheet.
           </h1>
