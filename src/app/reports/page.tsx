@@ -12,6 +12,7 @@ import {
   isValidMonthKey,
   shiftMonthKey
 } from "@/lib/reports/monthly-report";
+import { logServerError } from "../../lib/monitoring/server-log";
 
 const currencyFormatter = new Intl.NumberFormat("en-MY", {
   style: "currency",
@@ -300,6 +301,7 @@ export default async function ReportsPage({
   try {
     items = await listTransactions(userId);
   } catch (loadFailure) {
+    logServerError("reports.load-transactions", loadFailure, { userId });
     loadError = "Unable to load reporting data right now.";
   }
 

@@ -14,7 +14,7 @@ type AppShellProps = {
 };
 
 type ProtectedAppShellProps = Omit<AppShellProps, "children"> & {
-  children: ReactNode | ((userId: string) => ReactNode);
+  children: ReactNode | ((userId: string) => ReactNode | Promise<ReactNode>);
 };
 
 export function AppShell({
@@ -65,10 +65,10 @@ export async function ProtectedAppShell({
   ...props
 }: ProtectedAppShellProps) {
   const userId = await requireUserId();
+  const resolvedChildren =
+    typeof children === "function" ? await children(userId) : children;
 
   return (
-    <AppShell {...props}>
-      {typeof children === "function" ? children(userId) : children}
-    </AppShell>
+    <AppShell {...props}>{resolvedChildren}</AppShell>
   );
 }

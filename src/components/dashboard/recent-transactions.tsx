@@ -4,6 +4,7 @@ import {
   type TransactionListItem
 } from "@/app/actions/transactions";
 import type { TransactionType } from "@/lib/db/types";
+import { logServerError } from "../../lib/monitoring/server-log";
 import { buildDashboardSnapshot, SummaryCards } from "./summary-cards";
 
 type RecentTransactionsProps = {
@@ -118,6 +119,7 @@ export async function DashboardOverview({ userId }: DashboardOverviewProps) {
   try {
     items = await listTransactions(userId);
   } catch (loadFailure) {
+    logServerError("dashboard.load-transactions", loadFailure, { userId });
     loadError =
       loadFailure instanceof Error
         ? loadFailure.message

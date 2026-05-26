@@ -5,6 +5,7 @@ import { AuthApiError } from "@supabase/supabase-js";
 import { clearSession, persistSession } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { loginSchema, signUpSchema } from "@/lib/validation/auth";
+import { logServerError } from "../../lib/monitoring/server-log";
 
 const AUTH_RATE_LIMIT_WINDOW_MS = 60_000;
 const AUTH_RATE_LIMIT_MAX_ATTEMPTS = 5;
@@ -88,6 +89,13 @@ function getAuthErrorMessage(error: unknown) {
       return "Check your email to confirm your account before logging in.";
     }
 
+    if (
+      message.includes("rate limit") ||
+      message.includes("over_email_send_rate_limit")
+    ) {
+      return "Too many sign-up attempts were made recently. Please wait a bit and try again.";
+    }
+
     return "We couldn't verify your account details right now. Please try again.";
   }
 
@@ -127,21 +135,25 @@ export async function signUpAction(formData: FormData): Promise<void> {
   let data:
     | Awaited<ReturnType<ReturnType<typeof createServerSupabaseClient>["auth"]["signUp"]>>["data"]
     | null = null;
+  let authError: unknown = null;
 
   try {
     const supabase = createServerSupabaseClient();
     const result = await supabase.auth.signUp(normalizedPayload);
-
-    if (result.error) {
-      redirect(
-        buildAuthRedirect("/signup", "error", getAuthErrorMessage(result.error))
-      );
-    }
-
+    authError = result.error;
     data = result.data;
   } catch (error) {
+    logServerError("auth.signup", error, {
+      email: normalizedPayload.email
+    });
     redirect(
       buildAuthRedirect("/signup", "error", getAuthErrorMessage(error))
+    );
+  }
+
+  if (authError) {
+    redirect(
+      buildAuthRedirect("/signup", "error", getAuthErrorMessage(authError))
     );
   }
 
@@ -193,20 +205,24 @@ export async function loginAction(formData: FormData): Promise<void> {
         >
       >["data"]
     | null = null;
+  let authError: unknown = null;
 
   try {
     const supabase = createServerSupabaseClient();
     const result = await supabase.auth.signInWithPassword(normalizedPayload);
-
-    if (result.error) {
-      redirect(
-        buildAuthRedirect("/login", "error", getAuthErrorMessage(result.error))
-      );
-    }
-
+    authError = result.error;
     data = result.data;
   } catch (error) {
+    logServerError("auth.login", error, {
+      email: normalizedPayload.email
+    });
     redirect(buildAuthRedirect("/login", "error", getAuthErrorMessage(error)));
+  }
+
+  if (authError) {
+    redirect(
+      buildAuthRedirect("/login", "error", getAuthErrorMessage(authError))
+    );
   }
 
   if (!data?.session) {
@@ -226,8 +242,13 @@ export async function loginAction(formData: FormData): Promise<void> {
 }
 
 export async function logoutAction() {
-  const supabase = createServerSupabaseClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = createServerSupabaseClient();
+    await supabase.auth.signOut();
+  } catch (error) {
+    logServerError("auth.logout", error);
+  }
+
   await clearSession();
   redirect("/login");
 }

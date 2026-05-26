@@ -8,6 +8,7 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { TransactionList } from "@/components/transactions/transaction-list";
 import { requireUserId } from "@/lib/auth/session";
+import { logServerError } from "../../lib/monitoring/server-log";
 
 type TransactionsPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -75,6 +76,7 @@ export default async function TransactionsPage({
       listTransactionCategories(userId)
     ]);
   } catch (loadFailure) {
+    logServerError("transactions.load-page", loadFailure, { userId });
     loadError =
       loadFailure instanceof Error
         ? loadFailure.message

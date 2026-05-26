@@ -7,6 +7,7 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { TransactionForm } from "@/components/transactions/transaction-form";
 import { requireUserId } from "@/lib/auth/session";
+import { logServerError } from "../../../lib/monitoring/server-log";
 
 type NewTransactionPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -42,6 +43,7 @@ export default async function NewTransactionPage({
   try {
     categories = await listTransactionCategories(userId);
   } catch (categoryFailure) {
+    logServerError("transactions.load-new-form", categoryFailure, { userId });
     loadError =
       categoryFailure instanceof Error
         ? categoryFailure.message
